@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}{{ musteri.ad_soyad }} - Müşteri Profili{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- ÜST NAVİGASYON -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'musteri_ara' %}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left"></i> Müşteri Ara
+            </a>
+            <a href="{% url 'ana_sayfa' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-house"></i> Ana Sayfa
+            </a>
+        </div>
+        <h4 class="mb-0">{{ musteri.ad_soyad }} - Profil</h4>
+        <div style="width: 150px;"></div> <!-- Boşluk için -->
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Müşteri Kartı -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-person-badge"></i> Müşteri Bilgileri</h5>
+                </div>
+                <div class="card-body">
+                    <h4>{{ musteri.ad_soyad }}</h4>
+                    <p class="mb-1"><i class="bi bi-telephone"></i> {{ musteri.telefon }}</p>
+                    {% if musteri.email %}
+                        <p class="mb-1"><i class="bi bi-envelope"></i> {{ musteri.email }}</p>
+                    {% endif %}
+                    <p class="mb-1"><i class="bi bi-geo-alt"></i> {{ musteri.adres }}</p>
+                    {% if musteri.dogum_tarihi %}
+                        <p class="mb-1"><i class="bi bi-cake"></i> {{ musteri.dogum_tarihi|date:"d.m.Y" }}</p>
+                    {% endif %}
+                    <p class="mb-1"><i class="bi bi-calendar"></i> Kayıt: {{ musteri.kayit_tarihi|date:"d.m.Y" }}</p>
+                </div>
+            </div>
+            
+            <!-- Sadakat Kartı -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-star-fill"></i> Sadakat Programı</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="display-1 fw-bold" style="color: #0E2A47;">{{ musteri.sadakat_puani }}</h1>
+                    <p class="lead">Sadakat Puanı</p>
+                    
+                    <div class="row mt-3">
+                        <div class="col-6">
+                            <span class="badge bg-{% if musteri.sadakat_seviyesi == 'Platin' %}dark{% elif musteri.sadakat_seviyesi == 'Altın' %}warning{% elif musteri.sadakat_seviyesi == 'Gümüş' %}secondary{% else %}bronz{% endif %} p-2" style="font-size: 1.2rem;">
+                                👑 {{ musteri.sadakat_seviyesi }}
+                            </span>
+                        </div>
+                        <div class="col-6">
+                            <span class="badge bg-info text-white p-2" style="font-size: 1.2rem;">
+                                🏆 {{ musteri.ziyaret_sayisi }} Ziyaret
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row mt-2">
+                        <div class="col-6 text-start">
+                            <small>Toplam Harcama</small>
+                        </div>
+                        <div class="col-6 text-end fw-bold">
+                            {{ musteri.toplam_harcama|floatformat:2 }} TL
+                        </div>
+                    </div>
+                    {% if musteri.son_ziyaret %}
+                    <div class="row">
+                        <div class="col-6 text-start">
+                            <small>Son Ziyaret</small>
+                        </div>
+                        <div class="col-6 text-end">
+                            {{ musteri.son_ziyaret|date:"d.m.Y" }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if musteri.dogum_gunu_indirimi %}
+                        <div class="alert alert-danger mt-3">
+                            🎂 DOĞUM GÜNÜ İNDİRİMİ! %20 İNDİRİM
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Puan Geçmişi -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Puan Hareketleri</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>İşlem</th>
+                                    <th class="text-end">Puan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for hareket in puan_hareketleri %}
+                                <tr>
+                                    <td>{{ hareket.tarih|date:"d.m.Y H:i" }}</td>
+                                    <td>{{ hareket.aciklama }}</td>
+                                    <td class="text-end fw-bold {% if hareket.puan > 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {% if hareket.puan > 0 %}+{% endif %}{{ hareket.puan }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-3">Puan hareketi bulunamadı.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Kuponlar -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-ticket-perforated"></i> Kullanılabilir Kuponlar</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for kupon in kuponlar %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-{{ kupon.tip|yesno:'primary,success,warning' }}">
+                                <div class="card-header bg-light">
+                                    <strong>{{ kupon.kod }}</strong>
+                                    <span class="badge bg-{{ kupon.tip|yesno:'primary,success,warning' }} float-end">{{ kupon.get_tip_display }}</span>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        {% if kupon.tip == 'yuzde' %}
+                                            %{{ kupon.deger }} İndirim
+                                        {% elif kupon.tip == 'sabit' %}
+                                            {{ kupon.deger }} TL İndirim
+                                        {% else %}
+                                            {{ kupon.deger }} TL ({{ kupon.gerekli_puan }} Puan)
+                                        {% endif %}
+                                    </h5>
+                                    <p class="card-text small">{{ kupon.aciklama }}</p>
+                                    <ul class="list-unstyled small">
+                                        <li>🛒 Min. Harcama: {{ kupon.min_harcama }} TL</li>
+                                        <li>📅 Son Kullanım: {{ kupon.bitis_tarihi|date:"d.m.Y" }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12 text-center text-muted">
+                            Kullanılabilir kupon bulunamadı.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sipariş Geçmişi -->
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-receipt"></i> Sipariş Geçmişi</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Şube</th>
+                                    <th>Masa/Paket</th>
+                                    <th class="text-end">Tutar</th>
+                                    <th class="text-end">Kazanılan Puan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for adisyon in siparisler %}
+                                <tr>
+                                    <td>{{ adisyon.acilis_zamani|date:"d.m.Y H:i" }}</td>
+                                    <td>{{ adisyon.sube.ad }}</td>
+                                    <td>
+                                        {% if adisyon.siparis_turu == 'Paket' %}
+                                            📦 Paket
+                                        {% else %}
+                                            🪑 Masa {{ adisyon.masa.masa_no }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">{{ adisyon.toplam_tutar|floatformat:2 }} TL</td>
+                                    <td class="text-end text-success">+{{ adisyon.kazanilan_puan|default:0 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-3">Sipariş geçmişi bulunamadı.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alt Kısımda Geri Butonu (Mobil için) -->
+            <div class="d-block d-md-none mt-3">
+                <a href="{% url 'musteri_ara' %}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-left"></i> Müşteri Arama Sayfasına Dön
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alt Navigasyon (Büyük ekranlar için) -->
+    <div class="row mt-4 d-none d-md-block">
+        <div class="col-12">
+            <hr>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'musteri_ara' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i> Müşteri Ara
+                </a>
+                <a href="{% url 'ana_sayfa' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-house"></i> Ana Sayfa
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Sadakat seviyesi renkleri */
+    .badge.bg-bronz {
+        background-color: #cd7f32 !important;
+        color: white;
+    }
+    .badge.bg-gümüş {
+        background-color: #c0c0c0 !important;
+        color: black;
+    }
+    .badge.bg-altın {
+        background-color: #ffd700 !important;
+        color: black;
+    }
+    .badge.bg-platin {
+        background-color: #e5e4e2 !important;
+        color: black;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Garson Paneli</h2>
+        <div class="d-flex gap-2">
+            <a href="{{ back_url }}" class="btn btn-outline-primary">Yonetim Paneline Don</a>
+            <a href="{% url 'ana_sayfa' %}" class="btn btn-outline-secondary">Ana Ekran</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow-sm border-danger">
+        <div class="card-header bg-danger text-white">
+            <strong>Bekleyen Çağrılar</strong>
+        </div>
+        <div class="card-body">
+            {% if bekleyen_cagrilar %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Masa</th>
+                                <th>Şube</th>
+                                <th>Tarih</th>
+                                <th>Durum</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cagri in bekleyen_cagrilar %}
+                            <tr>
+                                <td>{{ cagri.id }}</td>
+                                <td>Masa {{ cagri.masa_no }}</td>
+                                <td>{{ cagri.sube.ad }}</td>
+                                <td>{{ cagri.zaman|date:"d.m.Y H:i:s" }}</td>
+                                <td>
+                                    <span class="badge bg-danger">Bekliyor</span>
+                                </td>
+                                <td>
+                                    <form method="post" action="{% url 'garson_cagri_tamamla' cagri.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ back_url }}">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            Tamamlandı
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info mb-0">
+                    Bekleyen garson çağrısı yok.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<script>
+setInterval(() => {
+    location.reload();
+}, 5000);
+</script>
+{% endblock %}

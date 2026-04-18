@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Yazici Yonetimi{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background:
+            radial-gradient(circle at top left, rgba(29,161,161,0.10), transparent 24%),
+            linear-gradient(180deg, #eef4f7 0%, #f8fafc 100%);
+    }
+
+    .page-shell {
+        padding: 32px 0 48px;
+    }
+
+    .hero-card {
+        border: 0;
+        border-radius: 28px;
+        color: #fff;
+        background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%);
+        box-shadow: 0 18px 40px rgba(14, 42, 71, 0.18);
+    }
+
+    .soft-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .pill-btn {
+        border-radius: 999px;
+        padding: 0.8rem 1.25rem;
+        font-weight: 700;
+    }
+
+    .target-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        border-radius: 999px;
+        padding: 0.35rem 0.75rem;
+        background: #edf6ff;
+        color: #0E2A47;
+        font-weight: 700;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+    <div class="hero-card p-4 p-lg-5 mb-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+            <div>
+                <h1 class="h2 fw-bold mb-2">Yazici Yonetimi</h1>
+                <p class="mb-0 opacity-75">Ag yazicisi veya Windows yazicisi tanimlayabilir, mevcut yazicilari duzenleyebilir ve silmeden once baglanti hedefini gorebilirsiniz.</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'yonetim_paneli' %}" class="btn btn-light pill-btn">
+                    <i class="bi bi-grid me-2"></i>Yonetim Paneli
+                </a>
+                <a href="{% url 'ana_sayfa' %}" class="btn btn-outline-light pill-btn">
+                    <i class="bi bi-house me-2"></i>Ana Ekran
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} shadow-sm">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card soft-card h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="h5 fw-bold mb-0">
+                            <i class="bi bi-printer-fill text-primary me-2"></i>
+                            {% if duzenlenen %}Yaziciyi Duzenle{% else %}Yeni Yazici Ekle{% endif %}
+                        </h2>
+                        {% if duzenlenen %}
+                            <a href="{% url 'yazici_yonetimi' %}" class="btn btn-sm btn-outline-secondary rounded-pill">Yeni Form</a>
+                        {% endif %}
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="islem" value="kaydet">
+
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="text-danger small mt-1">{{ field.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <div class="d-flex gap-2 flex-wrap mt-4">
+                            <button type="submit" class="btn btn-primary pill-btn">
+                                <i class="bi bi-floppy me-2"></i>
+                                {% if duzenlenen %}Guncelle{% else %}Kaydet{% endif %}
+                            </button>
+                            {% if duzenlenen %}
+                                <a href="{% url 'yazici_yonetimi' %}" class="btn btn-outline-secondary pill-btn">Vazgec</a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card soft-card">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <h2 class="h5 fw-bold mb-0"><i class="bi bi-list-ul text-success me-2"></i>Kayitli Yazicilar</h2>
+                        <span class="text-muted small">{{ yazicilar|length }} kayit</span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Yazici</th>
+                                    <th>Sube</th>
+                                    <th>Baglanti</th>
+                                    <th>Tip</th>
+                                    <th class="text-end">Islem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for yazici in yazicilar %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold">{{ yazici.ad }}</div>
+                                            <small class="text-muted">Port: {{ yazici.port }}</small>
+                                        </td>
+                                        <td>{{ yazici.sube.ad }}</td>
+                                        <td>
+                                            <span class="target-badge">
+                                                <i class="bi {% if yazici.baglanti_tipi == 'windows' %}bi-windows{% else %}bi-router{% endif %}"></i>
+                                                {{ yazici.baglanti_hedefi }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div>{{ yazici.get_yazici_tipi_display }}</div>
+                                            <small class="text-muted">{{ yazici.get_baglanti_tipi_display }}</small>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="d-inline-flex gap-2 flex-wrap justify-content-end">
+                                                <a href="{% url 'yazici_yonetimi' %}?duzenle={{ yazici.id }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                                                    <i class="bi bi-pencil me-1"></i>Duzenle
+                                                </a>
+                                                <form method="post" class="d-inline" onsubmit="return confirm('Bu yazici silinsin mi?');">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="islem" value="sil">
+                                                    <input type="hidden" name="yazici_id" value="{{ yazici.id }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
+                                                        <i class="bi bi-trash me-1"></i>Sil
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-4">Henuz tanimli yazici yok.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

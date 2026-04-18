@@ -1,0 +1,279 @@
+:root {
+    --elaki-navy: #0e2a47;
+    --elaki-navy-soft: #163a5f;
+    --elaki-teal: #1da1a1;
+    --elaki-teal-soft: #84d7cf;
+    --elaki-cream: #f4f8f8;
+    --elaki-surface: #ffffff;
+    --elaki-border: #d6e4e7;
+    --elaki-text: #17324a;
+    --elaki-muted: #607789;
+    --elaki-shadow: 0 18px 40px rgba(14, 42, 71, 0.14);
+}
+
+html[data-theme="light"],
+body {
+    background:
+        radial-gradient(circle at top left, rgba(29, 161, 161, 0.14), transparent 28%),
+        linear-gradient(180deg, #eef5f6 0%, #f8fbfb 100%);
+    color: var(--elaki-text);
+}
+
+#header {
+    background: rgba(255, 255, 255, 0.96);
+    color: var(--elaki-text);
+    box-shadow: 0 10px 30px rgba(14, 42, 71, 0.24);
+    border-bottom: 1px solid var(--elaki-border);
+}
+
+#site-name,
+#site-name a,
+#user-tools,
+#user-tools a,
+#logout-form button {
+    color: var(--elaki-text);
+}
+
+div.breadcrumbs {
+    background: rgba(255, 255, 255, 0.94);
+    color: var(--elaki-muted);
+    border-top: 1px solid var(--elaki-border);
+    border-bottom: 1px solid var(--elaki-border);
+}
+
+div.breadcrumbs a {
+    color: var(--elaki-teal);
+}
+
+.module h2,
+.module caption,
+.inline-group h2 {
+    background: linear-gradient(135deg, var(--elaki-navy) 0%, var(--elaki-teal) 100%);
+    color: #fff;
+    border: 0;
+    border-radius: 14px 14px 0 0;
+}
+
+#content-related,
+.module,
+.submit-row,
+.dashboard #content,
+#changelist-filter,
+.results,
+.form-row,
+.inline-group {
+    border-radius: 18px;
+}
+
+#content-related,
+.module,
+#changelist-filter,
+.results,
+.submit-row,
+.selector,
+.calendarbox,
+.clockbox {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--elaki-border);
+    box-shadow: var(--elaki-shadow);
+}
+
+#changelist table thead th,
+.results thead th {
+    background: #edf6f6;
+    color: var(--elaki-navy);
+}
+
+a:link,
+a:visited {
+    color: var(--elaki-teal);
+}
+
+a:hover,
+a:focus {
+    color: var(--elaki-navy);
+}
+
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button {
+    background: linear-gradient(135deg, var(--elaki-navy) 0%, var(--elaki-teal) 100%);
+    border: 0;
+    color: #fff;
+    border-radius: 999px;
+    box-shadow: 0 10px 22px rgba(14, 42, 71, 0.18);
+}
+
+.button.default,
+input[type="submit"].default,
+.submit-row input.default {
+    background: linear-gradient(135deg, var(--elaki-teal) 0%, var(--elaki-navy) 100%);
+}
+
+.button:hover,
+.button:focus,
+input[type="submit"]:hover,
+input[type="submit"]:focus,
+input[type="button"]:hover,
+input[type="button"]:focus,
+.submit-row input:hover,
+.submit-row input:focus,
+a.button:hover,
+a.button:focus {
+    background: linear-gradient(135deg, var(--elaki-navy-soft) 0%, var(--elaki-teal) 100%);
+}
+
+.button.delete-link,
+a.deletelink,
+.submit-row a.deletelink {
+    background: #a62d3f;
+    box-shadow: none;
+}
+
+input,
+textarea,
+select,
+.vTextField,
+.vURLField,
+.vLargeTextField {
+    border-radius: 12px;
+    border: 1px solid var(--elaki-border);
+    background: #fff;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--elaki-teal);
+    box-shadow: 0 0 0 4px rgba(29, 161, 161, 0.14);
+}
+
+#nav-sidebar {
+    background: rgba(255, 255, 255, 0.96);
+    border-right: 1px solid var(--elaki-border);
+}
+
+#nav-sidebar .current-app .section:link,
+#nav-sidebar .current-app .section:visited,
+#nav-sidebar a:link,
+#nav-sidebar a:visited {
+    color: var(--elaki-text);
+}
+
+#nav-sidebar .current-model,
+#nav-sidebar a.current-model {
+    background: rgba(29, 161, 161, 0.22);
+    color: var(--elaki-navy);
+    border-radius: 12px;
+}
+
+tr:nth-child(even) {
+    background: #ffffff;
+}
+
+.row-form-errors {
+    background: #f7fbfb;
+}
+
+ul.messagelist li {
+    border-radius: 14px;
+    border: 0;
+    box-shadow: var(--elaki-shadow);
+}
+
+ul.messagelist li.success {
+    background: #e7f8f4;
+}
+
+ul.messagelist li.warning {
+    background: #fff6de;
+}
+
+ul.messagelist li.error {
+    background: #fdecef;
+}
+
+body.login {
+    background:
+        radial-gradient(circle at top, rgba(132, 215, 207, 0.22), transparent 26%),
+        linear-gradient(135deg, var(--elaki-navy) 0%, var(--elaki-teal) 100%);
+}
+
+body.login #container {
+    background: transparent;
+}
+
+body.login #content {
+    padding: 24px;
+}
+
+body.login #content-main {
+    float: none;
+    margin: 8vh auto 0;
+    max-width: 460px;
+}
+
+body.login .form-row,
+body.login .submit-row,
+body.login #content-main form {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: var(--elaki-shadow);
+}
+
+body.login #content-main form {
+    border-radius: 26px;
+    padding: 30px 30px 24px;
+}
+
+.elaki-branding {
+    display: flex;
+    align-items: center;
+}
+
+.elaki-brand-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--elaki-text) !important;
+    text-decoration: none;
+}
+
+.elaki-brand-logo {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    background: linear-gradient(135deg, rgba(14, 42, 71, 0.08) 0%, rgba(29, 161, 161, 0.18) 100%);
+    border-radius: 14px;
+    padding: 6px;
+}
+
+.elaki-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.elaki-brand-text strong {
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+}
+
+.elaki-brand-text span {
+    font-size: 0.76rem;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+@media (max-width: 767px) {
+    #header {
+        padding: 14px 18px;
+    }
+
+    .elaki-brand-text span {
+        display: none;
+    }
+}

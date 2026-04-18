@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>Yeni Müşteri Kaydı - ELAKİ</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .registration-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            border: none;
+        }
+        .card-header {
+            background-color: #0E2A47;
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            padding: 20px;
+            text-align: center;
+        }
+        .btn-save {
+            background-color: #1DA1A1;
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 12px;
+            transition: all 0.3s;
+        }
+        .btn-save:hover {
+            background-color: #168a8a;
+            transform: translateY(-2px);
+        }
+        .btn-back {
+            background-color: #6c757d;
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 12px;
+            transition: all 0.3s;
+        }
+        .btn-back:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+        .form-label {
+            color: #0E2A47;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            padding: 12px;
+        }
+        .form-control:focus {
+            border-color: #1DA1A1;
+            box-shadow: 0 0 0 0.25rem rgba(29, 161, 161, 0.15);
+        }
+        .text-accent { color: #1DA1A1; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card registration-card shadow-lg">
+                    <div class="card-header">
+                        <h4 class="mb-0">👤 YENİ MÜŞTERİ KAYDI</h4>
+                        <small class="opacity-75">ELAKİ Yönetim Sistemleri</small>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <label class="form-label">MÜŞTERİ ADI SOYADI</label>
+                                <input type="text" name="ad_soyad" class="form-control" placeholder="Örn: Ahmet Yılmaz" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">TELEFON NUMARASI</label>
+                                <input type="text" name="telefon" class="form-control" placeholder="05XX XXX XX XX" required>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">TESLİMAT ADRESİ</label>
+                                <textarea name="adres" class="form-control" rows="4" placeholder="Mahalle, Cadde, Sokak, No/Daire bilgilerini giriniz..." required></textarea>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-save shadow-sm">💾 MÜŞTERİYİ SİSTEME KAYDET</button>
+                                <a href="{% url 'musteri_ara' %}" class="btn btn-back shadow-sm">← Müşteri Arama Sayfasına Dön</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Logo Filigran -->
+    <div class="footer-logo-container">
+        <img src="/static/elaki-logo.png" alt="ELAKİ Logo">
+    </div>
+
+    <style>
+        .footer-logo-container {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .footer-logo-container img {
+            width: 180px;
+            opacity: 0.6;
+            filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.1));
+        }
+        @media print {
+            .footer-logo-container {
+                display: none !important;
+            }
+        }
+        @media (max-width: 768px) {
+            .footer-logo-container img {
+                width: 120px;
+                opacity: 0.4;
+            }
+        }
+    </style>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

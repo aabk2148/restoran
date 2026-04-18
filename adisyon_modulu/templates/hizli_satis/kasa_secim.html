@@ -1,0 +1,604 @@
+{% extends 'hizli_satis/base.html' %}
+{% load static %}
+
+{% block title %}Hesap Seçimi - ELAKI Hızlı Satış{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: white;
+    }
+
+    .main-container {
+        padding: 20px 15px;
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    /* Hoşgeldiniz Başlığı - index.html ile uyumlu */
+    .welcome-section {
+        margin-bottom: 30px;
+    }
+
+    .welcome-section img {
+        width: 200px !important;
+        margin-bottom: 5px;
+    }
+
+    .welcome-title {
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    /* Kasa Kartları - index.html'deki branch-card stilinde */
+    .kasa-card {
+        background: rgba(255, 255, 255, 0.95);
+        border: none;
+        border-radius: 20px;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-decoration: none !important;
+        display: block;
+        padding: 25px 15px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .kasa-card:hover {
+        transform: translateY(-5px);
+        background: #ffffff;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+
+    .kasa-drag-handle {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        z-index: 4;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        border: 1px solid rgba(13, 42, 71, 0.12);
+        background: rgba(255, 255, 255, 0.95);
+        color: #0E2A47;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        font-size: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .kasa-drag-handle:active {
+        cursor: grabbing;
+    }
+
+    .kasa-sort-item {
+        position: relative;
+    }
+
+    .kasa-sort-ghost {
+        opacity: 0.55;
+    }
+
+    .badge-favori1 {
+        position: absolute;
+        top: 12px;
+        left: 52px;
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        color: #3e2723;
+        padding: 3px 10px;
+        border-radius: 30px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        z-index: 3;
+        border: 1px solid rgba(255,255,255,0.35);
+        letter-spacing: 0.3px;
+    }
+
+    .btn-kasa-favori {
+        position: absolute;
+        top: 10px;
+        left: auto;
+        right: 108px;
+        z-index: 4;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 193, 7, 0.45);
+        background: rgba(255, 243, 200, 0.95);
+        color: #b8860b;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .btn-kasa-favori.is-on {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .kasa-card .kasa-icon {
+        font-size: 2.5rem;
+        color: #1DA1A1;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .kasa-card .kasa-name {
+        color: #0E2A47;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 3px;
+    }
+
+    .kasa-card .kasa-sube {
+        color: #666;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+    }
+
+    .kasa-card .kasa-sube i {
+        margin-right: 3px;
+        font-size: 0.75rem;
+    }
+
+    /* Aktif Badge - quick-sale-badge stilinde */
+    .badge-aktif {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        padding: 3px 10px;
+        border-radius: 30px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        backdrop-filter: blur(5px);
+        z-index: 2;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .badge-aktif i {
+        font-size: 0.7rem;
+        margin-right: 3px;
+    }
+
+    /* Bilgi Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin: 15px 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .info-item {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 12px;
+        padding: 10px 5px;
+        text-align: center;
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.2s;
+    }
+
+    .info-item:hover {
+        background: white;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .info-item .label {
+        font-size: 0.7rem;
+        color: #666;
+        margin-bottom: 3px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-item .value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0E2A47;
+    }
+
+    .info-item .value i {
+        color: #1DA1A1;
+        margin-right: 2px;
+        font-size: 0.9rem;
+    }
+
+    /* Butonlar */
+    .btn-kasa {
+        background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%);
+        color: white;
+        border: none;
+        border-radius: 40px;
+        padding: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 5px 15px rgba(13,42,71,0.3);
+        width: 100%;
+        margin-bottom: 8px;
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-kasa:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(13,42,71,0.4);
+        color: white;
+    }
+
+    .btn-kasa i {
+        font-size: 1.1rem;
+    }
+
+    .btn-group-action {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+    }
+
+    .btn-action {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 30px;
+        padding: 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        color: #0E2A47;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .btn-action:hover {
+        background: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 10px rgba(13,42,71,0.1);
+        color: #1DA1A1;
+    }
+
+    .btn-action i {
+        font-size: 0.8rem;
+    }
+
+    /* Geri Butonu - admin-btn stilinde */
+    .btn-back {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 40px;
+        padding: 8px 20px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.3s;
+        backdrop-filter: blur(5px);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: translateX(-3px);
+    }
+
+    .btn-back i {
+        font-size: 1rem;
+    }
+
+    /* Uyarı Mesajı */
+    .alert-custom {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .alert-custom i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #ffc107;
+    }
+
+    .alert-custom h4 {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+
+    .alert-custom p {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-bottom: 0;
+    }
+
+    /* İpucu Etiketleri */
+    .tip-badge {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 6px 15px;
+        border-radius: 40px;
+        font-size: 0.8rem;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .tip-badge i {
+        font-size: 0.9rem;
+        color: rgba(255,255,255,0.8);
+    }
+
+    /* Grid aralığı */
+    .row.g-4 {
+        --bs-gutter-y: 1rem;
+    }
+
+    /* Footer Logo */
+    .footer-logo-container {
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .footer-logo-container img {
+        width: 140px;
+        opacity: 0.5;
+    }
+
+    /* Açıklama Metni */
+    .section-desc {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px 0;
+    }
+
+    .section-desc span {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 8px 20px;
+        border-radius: 40px;
+        font-size: 0.9rem;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .section-desc i {
+        margin-right: 8px;
+        color: rgba(255,255,255,0.8);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <!-- Logo ve Hoşgeldiniz - index.html ile aynı -->
+    <div class="welcome-section text-center">
+        <div style="text-align: center; margin-top: 10px; margin-bottom: 10px;">
+            <img src="/static/elaki-logo.png" alt="ELAKİ Logo" style="width: 200px; height: auto;">
+        </div>
+        <p class="h6 fw-light opacity-75">Hızlı Satış Modülü'ne Hoş Geldiniz</p>
+    </div>
+
+   
+
+    <!-- Açıklama Metni -->
+    <div class="section-desc">
+        <span>
+            <i class="bi bi-cash-register"></i>
+            Hesap sırasını sol tutamaktan sürükleyerek değiştirin; yıldız ile Favori&nbsp;1 varsayılanını seçin
+        </span>
+    </div>
+
+    <!-- Kasa Kartları Grid -->
+    <div id="kasa-sort-root" class="row justify-content-center g-3">
+        {% for kasa in kasalar %}
+        <div class="col-md-5 col-lg-4 kasa-sort-item" data-kasa-id="{{ kasa.id }}">
+            <div class="kasa-card">
+                <span class="kasa-drag-handle" title="Surukle"><i class="bi bi-grip-vertical"></i></span>
+                {% if kasa.favori_bir %}
+                <span class="badge-favori1">Favori 1</span>
+                {% endif %}
+                <button type="button"
+                    class="btn-kasa-favori {% if kasa.favori_bir %}is-on{% endif %}"
+                    data-kasa-id="{{ kasa.id }}"
+                    title="Favori 1 (varsayilan)">
+                    <i class="bi {% if kasa.favori_bir %}bi-star-fill{% else %}bi-star{% endif %}"></i>
+                </button>
+                <!-- Aktif Badge -->
+                <span class="badge-aktif">
+                    <i class="bi bi-check-circle-fill"></i> AKTİF
+                </span>
+
+                <!-- Kasa İkonu -->
+                <i class="bi bi-cash-register kasa-icon"></i>
+
+                <!-- Kasa Bilgileri -->
+                <div class="kasa-name">{{ kasa.kasa_adi }}</div>
+                <div class="kasa-sube">
+                    <i class="bi bi-geo-alt"></i> {{ kasa.sube.ad }}
+                </div>
+                <div class="kasa-sube mb-2">
+                    <i class="bi bi-upc-scan"></i> Kasa No: {{ kasa.kasa_no }}
+                </div>
+
+                <!-- Bilgi Grid -->
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="label">Günlük Ciro</div>
+                        <div class="value">
+                            <i class="bi bi-cash"></i>
+                            {{ kasa.gunluk_ciro|floatformat:2 }} TL
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Satış Sayısı</div>
+                        <div class="value">
+                            <i class="bi bi-cart"></i>
+                            {{ kasa.gunluk_satis_sayisi }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Çalışma Saatleri -->
+                <div class="text-muted small mb-3">
+                    <i class="bi bi-clock"></i>
+                    {{ kasa.acilis_saati|time:"H:i" }} - {{ kasa.kapanis_saati|time:"H:i" }}
+                </div>
+
+                <!-- Butonlar -->
+                <a href="{% url 'kasa_ekrani' kasa.id %}" class="btn-kasa">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    Kasayı Aç
+                </a>
+
+                <div class="btn-group-action">
+                    <a href="{% url 'gun_sonu' kasa.id %}" class="btn-action">
+                        <i class="bi bi-calendar-check"></i>
+                        Gün Sonu
+                    </a>
+                    <a href="{% url 'satis_gecmisi' kasa.id %}" class="btn-action">
+                        <i class="bi bi-clock-history"></i>
+                        Geçmiş
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert-custom">
+                <i class="bi bi-exclamation-triangle"></i>
+                <h4>Kasa Bulunamadı</h4>
+                <p>Size tanımlanmış aktif kasa bulunamadı. Lütfen yöneticinizle iletişime geçin.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Hızlı İpuçları -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <span class="tip-badge">
+                    <i class="bi bi-upc-scan"></i> Barkod ile satış
+                </span>
+                <span class="tip-badge">
+                    <i class="bi bi-cart"></i> Sepet yönetimi
+                </span>
+                <span class="tip-badge">
+                    <i class="bi bi-credit-card"></i> Ödeme işlemleri
+                </span>
+                <span class="tip-badge">
+                    <i class="bi bi-printer"></i> Fiş yazdırma
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ELAKI Sabit Footer Logo -->
+<div class="footer-logo-container">
+    <img src="/static/elaki-logo.png" alt="ELAKİ Logo">
+</div>
+
+<!-- Sayfa Alt Boşluk -->
+<div style="height: 30px;"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script>
+(function () {
+    const root = document.getElementById('kasa-sort-root');
+    const csrftoken = '{{ csrf_token }}';
+    const siraUrl = '{% url "kasa_liste_sira_kaydet" %}';
+    const favoriUrl = '{% url "kasa_favori_bir_kaydet" %}';
+
+    function kaydetSira() {
+        if (!root) return;
+        const order = Array.from(root.querySelectorAll('.kasa-sort-item[data-kasa-id]')).map(function (el) {
+            return el.getAttribute('data-kasa-id');
+        });
+        if (!order.length) return;
+        fetch(siraUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ order: order })
+        }).then(function (r) { return r.json(); }).then(function (d) {
+            if (!d.success) console.warn('Sira kaydedilemedi', d);
+        }).catch(function (e) { console.warn(e); });
+    }
+
+    if (root && typeof Sortable !== 'undefined') {
+        new Sortable(root, {
+            animation: 160,
+            handle: '.kasa-drag-handle',
+            ghostClass: 'kasa-sort-ghost',
+            onEnd: kaydetSira
+        });
+    }
+
+    document.querySelectorAll('.btn-kasa-favori').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var id = btn.getAttribute('data-kasa-id');
+            fetch(favoriUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ kasa_id: parseInt(id, 10) })
+            }).then(function (r) { return r.json(); }).then(function (d) {
+                if (d.success) window.location.reload();
+                else alert(d.error || 'Islem basarisiz');
+            }).catch(function () { alert('Baglanti hatasi'); });
+        });
+    });
+})();
+</script>
+{% endblock %}

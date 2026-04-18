@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Ürün Yönetimi{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Ürün Yönetimi</h2>
+            <p class="text-muted mb-0">Ürünleri görüntüle, filtrele ve düzenle</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'urun_ekle' %}" class="btn btn-success rounded-pill px-3">
+                <i class="bi bi-plus-circle me-1"></i>Yeni Ürün
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Ara</label>
+                    <input type="text" name="q" class="form-control rounded-3"
+                           placeholder="Ürün adı ara..."
+                           value="{{ filtreler.q }}">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Kategori</label>
+                    <select name="kategori" class="form-select rounded-3">
+                        <option value="">Tümü</option>
+                        {% for kategori in kategoriler %}
+                            <option value="{{ kategori.id }}" {% if filtreler.kategori == kategori.id|stringformat:"s" %}selected{% endif %}>
+                                {{ kategori.ad }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Şube</label>
+                    <select name="sube" class="form-select rounded-3">
+                        <option value="">Tümü</option>
+                        {% for sube in subeler %}
+                            <option value="{{ sube.id }}" {% if filtreler.sube == sube.id|stringformat:"s" %}selected{% endif %}>
+                                {{ sube.ad }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Hızlı Satış</label>
+                    <select name="hizli_satis" class="form-select rounded-3">
+                        <option value="">Tümü</option>
+                        <option value="var" {% if filtreler.hizli_satis == "var" %}selected{% endif %}>Var</option>
+                        <option value="yok" {% if filtreler.hizli_satis == "yok" %}selected{% endif %}>Yok</option>
+                    </select>
+                </div>
+
+                <div class="col-12 d-flex gap-2 justify-content-end">
+                    <a href="{% url 'urun_listesi' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                        Temizle
+                    </a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                        <i class="bi bi-search me-1"></i>Filtrele
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if page_obj %}
+    <style>
+        .urun-item { cursor: grab; transition: transform 0.2s; }
+        .urun-item:active { cursor: grabbing; }
+        .sortable-ghost { opacity: 0.4; transform: scale(0.98); }
+    </style>
+
+    <div class="urun-gruplari">
+        {% for kat in kategoriler %}
+        <div class="kategori-section mb-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2" style="color: #0E2A47;">
+                <i class="bi bi-tag-fill me-2" style="color: #1DA1A1;"></i>{{ kat.ad }}
+            </h5>
+            <div class="row g-4 sortable-list" data-kategori="{{ kat.id }}">
+                {% for urun in page_obj %}
+                    {% if urun.kategori_id == kat.id %}
+                    <div class="col-md-6 col-xl-4 urun-item" data-id="{{ urun.id }}">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                            <div class="row g-0 h-100">
+                                <div class="col-4 bg-light d-flex align-items-center justify-content-center">
+                                    {% if urun.gorsel %}
+                                        <img src="{{ urun.gorsel.url }}" alt="{{ urun.ad }}" class="img-fluid" style="max-height: 140px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="text-center text-muted p-3">
+                                            <i class="bi bi-image fs-1 d-block mb-2"></i>
+                                            <small>Görsel Yok</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-8">
+                                    <div class="card-body d-flex flex-column h-100">
+                                        <div class="mb-2">
+                                            <h5 class="card-title fw-bold mb-1">
+                                                <i class="bi bi-arrows-move text-muted me-1 fs-6" title="Sürükle Sırala"></i>
+                                                <span class="badge bg-light text-secondary border me-1 sira-badge" title="Sıra Numarası">{{ urun.sira }}</span>
+                                                {{ urun.ad }}
+                                            </h5>
+
+                                           <div class="mb-2">
+                {% for alerjen in urun.alerjenler.all %}
+                    <span class="badge bg-light text-dark border me-1">
+                        {{ alerjen.ad }}
+                    </span>
+                {% empty %}
+                    <small class="text-muted">Alerjen yok</small>
+                {% endfor %}
+            </div>
+                                            <div class="small text-muted">
+                                                {% if urun.kategori %}{{ urun.kategori.ad }}{% else %}Kategori yok{% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <span class="badge bg-success-subtle text-success border me-1">
+                                                {{ urun.fiyat }} TL
+                                            </span>
+                                            <span class="badge bg-secondary-subtle text-secondary border me-1">
+                                                KDV %{{ urun.kdv_orani }}
+                                            </span>
+                                            {% if urun.bolge %}
+                                            <span class="badge bg-info-subtle text-info border">
+                                                {{ urun.bolge.ad }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="mb-3">
+                                            {% with hs=urun.hizli_satis_urunleri.first %}
+                                                {% if hs %}
+                                                    <div class="small">
+                                                        <span class="badge bg-primary">Hızlı Satışta Var</span>
+                                                        <div class="mt-2 text-muted">
+                                                            Barkod: <strong>{{ hs.barkod }}</strong><br>
+                                                            Satış: <strong>{{ hs.satis_fiyati }} TL</strong><br>
+                                                            Stok: <strong>{{ hs.stok_miktari }}</strong>
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <span class="badge bg-light text-dark border">Hızlı Satışta Yok</span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </div>
+
+                                        <div class="mt-auto d-flex gap-2">
+                                            <a href="{% url 'urun_duzenle' urun.id %}" class="btn btn-warning btn-sm rounded-pill flex-fill">
+                                                <i class="bi bi-pencil-square me-1"></i>Düzenle
+                                            </a>
+
+                                            <form method="post" action="{% url 'urun_sil' urun.id %}" class="flex-fill"
+                                                  onsubmit="return confirm('Bu ürünü silmek istediğinize emin misiniz?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger btn-sm rounded-pill w-100">
+                                                    <i class="bi bi-trash me-1"></i>Sil
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- KATEGORİSİZ ÜRÜNLER (EĞER VARSA) -->
+        <div class="kategori-section mb-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2" style="color: #0E2A47;">
+                <i class="bi bi-tag me-2" style="color: #1DA1A1;"></i>Kategorisiz Ürünler
+            </h5>
+            <div class="row g-4 sortable-list" data-kategori="none">
+                {% for urun in page_obj %}
+                    {% if not urun.kategori %}
+                    <div class="col-md-6 col-xl-4 urun-item" data-id="{{ urun.id }}">
+                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                            <div class="row g-0 h-100">
+                                <div class="col-4 bg-light d-flex align-items-center justify-content-center">
+                                    {% if urun.gorsel %}
+                                        <img src="{{ urun.gorsel.url }}" alt="{{ urun.ad }}" class="img-fluid" style="max-height: 140px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="text-center text-muted p-3">
+                                            <i class="bi bi-image fs-1 d-block mb-2"></i>
+                                            <small>Görsel Yok</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-8">
+                                    <div class="card-body d-flex flex-column h-100">
+                                        <div class="mb-2">
+                                            <h5 class="card-title fw-bold mb-1">
+                                                <i class="bi bi-arrows-move text-muted me-1 fs-6" title="Sürükle Sırala"></i>
+                                                <span class="badge bg-light text-secondary border me-1 sira-badge" title="Sıra Numarası">{{ urun.sira }}</span>
+                                                {{ urun.ad }}
+                                            </h5>
+
+                                           <div class="mb-2">
+                {% for alerjen in urun.alerjenler.all %}
+                    <span class="badge bg-light text-dark border me-1">
+                        {{ alerjen.ad }}
+                    </span>
+                {% empty %}
+                    <small class="text-muted">Alerjen yok</small>
+                {% endfor %}
+            </div>
+                                            <div class="small text-muted">
+                                                {% if urun.kategori %}{{ urun.kategori.ad }}{% else %}Kategori yok{% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <span class="badge bg-success-subtle text-success border me-1">
+                                                {{ urun.fiyat }} TL
+                                            </span>
+                                            <span class="badge bg-secondary-subtle text-secondary border me-1">
+                                                KDV %{{ urun.kdv_orani }}
+                                            </span>
+                                            {% if urun.bolge %}
+                                            <span class="badge bg-info-subtle text-info border">
+                                                {{ urun.bolge.ad }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="mb-3">
+                                            {% with hs=urun.hizli_satis_urunleri.first %}
+                                                {% if hs %}
+                                                    <div class="small">
+                                                        <span class="badge bg-primary">Hızlı Satışta Var</span>
+                                                        <div class="mt-2 text-muted">
+                                                            Barkod: <strong>{{ hs.barkod }}</strong><br>
+                                                            Satış: <strong>{{ hs.satis_fiyati }} TL</strong><br>
+                                                            Stok: <strong>{{ hs.stok_miktari }}</strong>
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <span class="badge bg-light text-dark border">Hızlı Satışta Yok</span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </div>
+
+                                        <div class="mt-auto d-flex gap-2">
+                                            <a href="{% url 'urun_duzenle' urun.id %}" class="btn btn-warning btn-sm rounded-pill flex-fill">
+                                                <i class="bi bi-pencil-square me-1"></i>Düzenle
+                                            </a>
+
+                                            <form method="post" action="{% url 'urun_sil' urun.id %}" class="flex-fill"
+                                                  onsubmit="return confirm('Bu ürünü silmek istediğinize emin misiniz?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger btn-sm rounded-pill w-100">
+                                                    <i class="bi bi-trash me-1"></i>Sil
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ filtreler.q }}&kategori={{ filtreler.kategori }}&sube={{ filtreler.sube }}&hizli_satis={{ filtreler.hizli_satis }}">Önceki</a>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}&q={{ filtreler.q }}&kategori={{ filtreler.kategori }}&sube={{ filtreler.sube }}&hizli_satis={{ filtreler.hizli_satis }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ filtreler.q }}&kategori={{ filtreler.kategori }}&sube={{ filtreler.sube }}&hizli_satis={{ filtreler.hizli_satis }}">Sonraki</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-box-seam fs-1 text-muted d-block mb-3"></i>
+            <h5 class="fw-bold">Ürün bulunamadı</h5>
+            <p class="text-muted">Filtreye uygun kayıt yok.</p>
+            <a href="{% url 'urun_ekle' %}" class="btn btn-success rounded-pill px-4">
+                İlk Ürünü Ekle
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Sortable.js Kütüphanesi (Sürükle bırak için) -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // İçi boş olan kategori başlıklarını otomatik olarak gizle
+        document.querySelectorAll('.kategori-section').forEach(function(section) {
+            var list = section.querySelector('.sortable-list');
+            if (list && list.children.length === 0) {
+                section.style.display = 'none';
+            }
+        });
+
+        // Tüm ürün ızgaralarını sürükle bırak formatına çevir
+        var sortables = document.querySelectorAll('.sortable-list');
+        sortables.forEach(function (el) {
+            new Sortable(el, {
+                group: 'urunler', // Kategoriler arası sürüklemeye izin verir!
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                handle: '.urun-item', // Kartın her yerinden tutulabilir
+                onEnd: function (evt) {
+                    // Sürükleme bitince hem kaynak hem de hedef kategoriyi güncelle
+                    var containers = [evt.to];
+                    if (evt.to !== evt.from) {
+                        containers.push(evt.from);
+                    }
+                    
+                    var csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+                    var csrfToken = csrfInput ? csrfInput.value : '{{ csrf_token }}';
+                    var siraData = [];
+                    
+                    containers.forEach(function(container) {
+                        var katId = container.getAttribute('data-kategori');
+                        var items = container.querySelectorAll('.urun-item');
+                        items.forEach(function (item, index) {
+                            // Ekranda sıra numarasını görsel olarak anında değiştir
+                            var badge = item.querySelector('.sira-badge');
+                            if (badge) badge.textContent = index;
+                            
+                            siraData.push({ 
+                                id: item.getAttribute('data-id'), 
+                                sira: index,
+                                kategori_id: katId
+                            });
+                        });
+                    });
+                    
+                    // Yeni sırayı ve olası kategori değişikliğini arka plana kaydet
+                    fetch('{% url "api_urun_sira_kaydet" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({sira_data: siraData})
+                    })
+                    .then(res => {
+                        if(!res.ok) throw new Error("Sunucu Hatası");
+                        return res.json();
+                    })
+                    .then(data => { 
+                        if(!data.success) alert('Sıralama kaydedilirken hata: ' + (data.error || 'Bilinmiyor')); 
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Bağlantı hatası! Sıralama sunucuya iletilemedi.');
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="mb-4">{{ baslik }}</h2>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-info">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label">Alerjen Adı</label>
+                    <input type="text" name="ad" class="form-control"
+                           value="{% if alerjen %}{{ alerjen.ad }}{% endif %}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Açıklama</label>
+                    <textarea name="aciklama" class="form-control" rows="4">{% if alerjen %}{{ alerjen.aciklama }}{% endif %}</textarea>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input type="checkbox" name="aktif" class="form-check-input" id="aktifCheck"
+                           {% if alerjen %}
+                               {% if alerjen.aktif %}checked{% endif %}
+                           {% else %}
+                               checked
+                           {% endif %}>
+                    <label class="form-check-label" for="aktifCheck">Aktif</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Kaydet</button>
+                <a href="{% url 'alerjen_listesi' %}" class="btn btn-secondary">Geri</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,266 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>Yedekleme Yonetimi - ELAKI</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+    <style>
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top, rgba(255, 255, 255, 0.18), transparent 28%),
+                linear-gradient(135deg, #0e2a47 0%, #1da1a1 100%);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            padding: 32px 0 48px;
+        }
+        .panel-card {
+            background: rgba(255, 255, 255, 0.96);
+            border: 0;
+            border-radius: 28px;
+            box-shadow: 0 24px 54px rgba(14, 42, 71, 0.18);
+        }
+        .soft-card {
+            border: 1px solid #d9e6ea;
+            border-radius: 22px;
+            box-shadow: 0 10px 24px rgba(14, 42, 71, 0.08);
+        }
+        .pill-btn {
+            border-radius: 999px;
+            padding: 0.85rem 1.35rem;
+            font-weight: 600;
+        }
+        .hero-chip {
+            border-radius: 999px;
+            padding: 0.45rem 0.85rem;
+            background: #e7f8f6;
+            color: #0e2a47;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="panel-card p-4 p-lg-5">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+                <div>
+                    <span class="hero-chip mb-3"><i class="bi bi-shield-check"></i> Otomatik koruma altyapisi hazir</span>
+                    <h1 class="h2 fw-bold mb-2 text-dark">Yedekleme Yonetimi</h1>
+                    <p class="text-muted mb-0">Manuel yedek alabilir, otomatik yedek saatini ayarlayabilir ve mevcut yedekleri tek tikla geri yukleyebilirsiniz.</p>
+                </div>
+                <a href="{% url 'ana_sayfa' %}" class="btn btn-dark pill-btn">
+                    <i class="bi bi-house-door me-2"></i>Ana Sayfa
+                </a>
+            </div>
+
+            {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags|default:'info' }} shadow-sm">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div class="soft-card h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h2 class="h5 mb-0 fw-bold"><i class="bi bi-gear-fill me-2 text-primary"></i>Yedekleme Ayarlari</h2>
+                                <span class="badge {% if ayar.aktif %}bg-success{% else %}bg-secondary{% endif %}">{% if ayar.aktif %}Aktif{% else %}Pasif{% endif %}</span>
+                            </div>
+
+                            <form method="post" action="{% url 'yedekleme_ayarlari_kaydet' %}" class="mb-3">
+                                {% csrf_token %}
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Yedekleme tipi</label>
+                                        <select name="yedek_tipi" class="form-select">
+                                            <option value="yerel" {% if ayar.yedekleme_tipi == 'yerel' %}selected{% endif %}>Yerel disk</option>
+                                            <option value="google_drive" {% if ayar.yedekleme_tipi == 'google_drive' %}selected{% endif %}>Google Drive</option>
+                                            <option value="dropbox" {% if ayar.yedekleme_tipi == 'dropbox' %}selected{% endif %}>Dropbox</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Yedekleme sikligi</label>
+                                        <select name="zaman_araligi" class="form-select">
+                                            <option value="1" {% if ayar.zaman_araligi == 1 %}selected{% endif %}>Her gun</option>
+                                            <option value="7" {% if ayar.zaman_araligi == 7 %}selected{% endif %}>Haftada bir</option>
+                                            <option value="30" {% if ayar.zaman_araligi == 30 %}selected{% endif %}>Ayda bir</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Otomatik yedek saati</label>
+                                        <input type="time" name="yedekleme_saati" class="form-control" value="{{ ayar.yedekleme_saati|time:'H:i' }}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Tutulacak yedek sayisi</label>
+                                        <input type="number" min="1" name="max_yerel_yedek" class="form-control" value="{{ ayar.max_yerel_yedek }}">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Yerel klasor yolu</label>
+                                        <input type="text" name="yerel_klasor" class="form-control" value="{{ ayar.yerel_klasor }}">
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="aktifSwitch" name="aktif" {% if ayar.aktif %}checked{% endif %}>
+                                            <label class="form-check-label" for="aktifSwitch">Otomatik yedekleme aktif olsun</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2 mt-4">
+                                    <button type="submit" class="btn btn-primary pill-btn">
+                                        <i class="bi bi-floppy me-2"></i>Ayarlari Kaydet
+                                    </button>
+                                </div>
+                            </form>
+
+                            <form method="post" action="{% url 'yedek_al_manuel' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="yedek_tipi" value="{{ ayar.yedekleme_tipi }}">
+                                <input type="hidden" name="zaman_araligi" value="{{ ayar.zaman_araligi }}">
+                                <input type="hidden" name="yedekleme_saati" value="{{ ayar.yedekleme_saati|time:'H:i' }}">
+                                <input type="hidden" name="yerel_klasor" value="{{ ayar.yerel_klasor }}">
+                                <input type="hidden" name="max_yerel_yedek" value="{{ ayar.max_yerel_yedek }}">
+                                {% if ayar.aktif %}<input type="hidden" name="aktif" value="on">{% endif %}
+                                <button type="submit" class="btn btn-dark pill-btn">
+                                    <i class="bi bi-cloud-arrow-up me-2"></i>Simdi Yedek Al
+                                </button>
+                            </form>
+
+                            <div class="row g-3 mt-3">
+                                <div class="col-md-6">
+                                    <div class="bg-light rounded-4 p-3 h-100">
+                                        <small class="text-muted d-block mb-1">Son basarili yedekleme</small>
+                                        <strong>{{ ayar.son_yedekleme|date:"d.m.Y H:i"|default:"Henuz alinmadi" }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="bg-light rounded-4 p-3 h-100">
+                                        <small class="text-muted d-block mb-1">Otomatik calisma mantigi</small>
+                                        <strong>{{ ayar.get_zaman_araligi_display }} / {{ ayar.yedekleme_saati|time:"H:i" }}</strong>
+                                        {% if haftalik_tek_yedek %}
+                                            <div class="small text-muted mt-2">Haftalik veya aylik modda eski arsivler tek yedege dusurulur.</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="soft-card mb-4">
+                        <div class="card-body p-4">
+                            <h2 class="h5 fw-bold mb-3"><i class="bi bi-arrow-repeat me-2 text-success"></i>Otomatik Geri Yukleme</h2>
+                            <p class="text-muted mb-3">En son veya secili yedegi sistem icinden otomatik geri yukleyebilirsiniz. Islemden sonra uygulamayi yeniden baslatmaniz en saglikli secenektir.</p>
+
+                            <form method="post" action="{% url 'yedek_geri_yukle' %}" onsubmit="return confirm('Secilen yedek geri yuklenecek. Devam etmek istiyor musunuz?');">
+                                {% csrf_token %}
+                                <label class="form-label fw-semibold">Geri yuklenecek yedek</label>
+                                <select name="geri_yukle_dosya" class="form-select mb-3">
+                                    {% for yedek in mevcut_yedekler %}
+                                        <option value="{{ yedek.ad }}">{{ yedek.ad }} - {{ yedek.tarih|date:"d.m.Y H:i" }}</option>
+                                    {% empty %}
+                                        <option value="">Kayitli yedek bulunamadi</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-outline-danger pill-btn w-100" {% if not mevcut_yedekler %}disabled{% endif %}>
+                                    <i class="bi bi-database-fill-gear me-2"></i>Secili Yedegi Geri Yukle
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="soft-card">
+                        <div class="card-body p-4">
+                            <h2 class="h5 fw-bold mb-3"><i class="bi bi-clock-history me-2 text-info"></i>Son Islemler</h2>
+                            <div class="list-group list-group-flush">
+                                {% for yedek in son_yedekler %}
+                                    <div class="list-group-item px-0">
+                                        <div class="d-flex justify-content-between align-items-start gap-3">
+                                            <div>
+                                                <div class="fw-semibold">{{ yedek.dosya_adi }}</div>
+                                                <small class="text-muted">{{ yedek.tarih|date:"d.m.Y H:i" }}</small>
+                                                {% if yedek.aciklama %}<div><small class="text-muted">{{ yedek.aciklama }}</small></div>{% endif %}
+                                                {% if yedek.hata_mesaji %}<div class="small text-danger mt-1">{{ yedek.hata_mesaji }}</div>{% endif %}
+                                            </div>
+                                            <span class="badge {% if yedek.durum == 'basari' %}bg-success{% elif yedek.durum == 'basarisiz' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ yedek.get_durum_display }}</span>
+                                        </div>
+                                    </div>
+                                {% empty %}
+                                    <div class="text-muted">Henuz bir yedek kaydi yok.</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="soft-card mt-4">
+                <div class="card-body p-4">
+                    <h2 class="h5 fw-bold mb-3"><i class="bi bi-collection me-2 text-secondary"></i>Yedek Kapsami</h2>
+                    <div class="row g-3">
+                        {% for kalem in yedek_kapsami %}
+                            <div class="col-md-6">
+                                <div class="bg-light rounded-4 p-3 h-100">{{ kalem }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="soft-card mt-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <h2 class="h5 fw-bold mb-0"><i class="bi bi-archive me-2 text-warning"></i>Mevcut Arsivler</h2>
+                        <small class="text-muted">{{ ayar.yerel_klasor }}</small>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Dosya</th>
+                                    <th>Tarih</th>
+                                    <th>Boyut</th>
+                                    <th class="text-end">Islem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for yedek in mevcut_yedekler %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ yedek.ad }}</td>
+                                        <td>{{ yedek.tarih|date:"d.m.Y H:i" }}</td>
+                                        <td>{{ yedek.boyut }}</td>
+                                        <td class="text-end">
+                                            <form method="post" action="{% url 'yedek_geri_yukle' %}" class="d-inline" onsubmit="return confirm('Bu yedek geri yuklenecek. Emin misiniz?');">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="geri_yukle_dosya" value="{{ yedek.ad }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger pill-btn">
+                                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Geri Yukle
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">Bu klasorde henuz yedek arsivi bulunmuyor.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

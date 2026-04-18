@@ -1,0 +1,1306 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>Masa {{ masa.masa_no }} - ELAKİ</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+
+    <style>
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --elaki-navy: #0E2A47;
+            --elaki-teal: #1DA1A1;
+            --elaki-soft: #f8fafc;
+        }
+
+        .text-navy { color: var(--elaki-navy); }
+
+        .btn-teal {
+            background-color: var(--elaki-teal);
+            color: white;
+            border: none;
+        }
+        .btn-teal:hover {
+            background-color: #168a8a;
+            color: white;
+        }
+
+        .btn-navy {
+            background-color: var(--elaki-navy);
+            color: white;
+            border: none;
+        }
+
+        .menu-card {
+            transition: transform 0.1s;
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .menu-card:active {
+            transform: scale(0.97);
+        }
+
+        .menu-img {
+            height: 80px;
+            object-fit: cover;
+            width: 100%;
+            background-color: #eee;
+        }
+
+        .fis-tasarim {
+            background: #ffffff;
+            padding: 18px;
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            max-width: 950px;
+            margin: auto;
+            color: #111827;
+            font-size: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+        }
+
+        .fis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 14px;
+            margin-bottom: 14px;
+        }
+
+        .fis-baslik {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--elaki-navy);
+            margin-bottom: 4px;
+        }
+
+        .fis-meta {
+            font-size: 0.9rem;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        .fis-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        .fis-table thead th {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            color: #6b7280;
+            padding: 8px 10px;
+        }
+
+        .fis-row {
+            background: #f8fafc;
+        }
+
+        .fis-row td {
+            padding: 12px 10px;
+            vertical-align: middle;
+            border-top: 1px solid #eef2f7;
+            border-bottom: 1px solid #eef2f7;
+            background: #f8fafc;
+        }
+
+        .fis-row td:first-child {
+            border-left: 1px solid #eef2f7;
+            border-top-left-radius: 14px;
+            border-bottom-left-radius: 14px;
+        }
+
+        .fis-row td:last-child {
+            border-right: 1px solid #eef2f7;
+            border-top-right-radius: 14px;
+            border-bottom-right-radius: 14px;
+        }
+
+        .urun-adi {
+            font-weight: 700;
+            color: #111827;
+            font-size: 1rem;
+        }
+
+        .urun-detay {
+            display: block;
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        .mini-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        .mini-badge.note {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        .mini-badge.ikram {
+            background: #fff3cd;
+            color: #7c5700;
+        }
+
+        .product-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: flex-end;
+        }
+
+        .product-action-btn {
+            min-width: 42px;
+            height: 38px;
+            border-radius: 10px;
+            border: 1px solid #dbe3ea;
+            background: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all .15s ease;
+            color: inherit;
+        }
+
+        .product-action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        .action-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0 10px;
+            min-width: auto;
+        }
+
+        .fis-ozet {
+            margin-top: 18px;
+            margin-left: auto;
+            width: 100%;
+            max-width: 340px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .fis-ozet-satir {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .fis-ozet-toplam {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--elaki-navy);
+            border-top: 1px solid #dbe3ea;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .nav-pills {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-pills .nav-link {
+            white-space: nowrap;
+            border: 1px solid #dee2e6;
+            color: var(--elaki-navy);
+            margin-right: 5px;
+            font-weight: 600;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: var(--elaki-teal);
+            border-color: var(--elaki-teal);
+        }
+
+        .rezervasyon-bilgi {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+
+        .quick-note-btn {
+            border: 1px solid #cfe2ff;
+            background: #f8fbff;
+            color: #0d6efd;
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .quick-note-btn:hover {
+            background: #e7f1ff;
+        }
+
+        @media (max-width: 768px) {
+            .fis-tasarim {
+                padding: 12px;
+                border-radius: 14px;
+            }
+
+            .fis-header {
+                flex-direction: column;
+            }
+
+            .fis-table thead {
+                display: none;
+            }
+
+            .fis-row td {
+                display: block;
+                width: 100%;
+                border-left: 1px solid #eef2f7 !important;
+                border-right: 1px solid #eef2f7 !important;
+                border-radius: 0 !important;
+                text-align: left !important;
+                padding: 8px 10px;
+            }
+
+            .fis-row td:first-child {
+                border-top-left-radius: 14px !important;
+                border-top-right-radius: 14px !important;
+            }
+
+            .fis-row td:last-child {
+                border-bottom-left-radius: 14px !important;
+                border-bottom-right-radius: 14px !important;
+            }
+
+            .product-actions {
+                justify-content: flex-start;
+            }
+
+            .fis-ozet {
+                max-width: 100%;
+            }
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #yazdirilacak-alan, #yazdirilacak-alan * { visibility: visible; }
+            #yazdirilacak-alan {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: none;
+                box-shadow: none;
+            }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container py-3">
+
+        <div class="d-flex justify-content-between align-items-center no-print mb-4">
+            <div>
+                <h2 class="mb-0 text-navy fw-bold">Masa {{ masa.masa_no }}</h2>
+                <span class="badge bg-secondary">{{ sube.ad }}</span>
+
+                {% if rezervasyon %}
+                    <span class="badge bg-warning text-dark ms-2">
+                        <i class="bi bi-calendar-check"></i> REZERVE ({{ rezervasyon.saat|time:"H:i" }})
+                    </span>
+                {% endif %}
+            </div>
+            <a href="{% url 'sube_detay' sube.id %}" class="btn btn-outline-secondary rounded-pill">← MASA SEÇİMİ</a>
+        </div>
+
+        {% if rezervasyon %}
+        <div class="rezervasyon-bilgi no-print">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="fw-bold mb-1"><i class="bi bi-calendar-check"></i> REZERVASYON BİLGİSİ</h6>
+                    <p class="mb-0">
+                        <strong>{{ rezervasyon.musteri_adi }}</strong> - {{ rezervasyon.kisi_sayisi }} kişi -
+                        Saat: {{ rezervasyon.saat|time:"H:i" }}
+                        {% if rezervasyon.durum == 'Onaylandı' %}
+                            <span class="badge bg-success">ONAYLI</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">BEKLİYOR</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'rezervasyon_detay' rezervasyon.id %}" class="btn btn-sm btn-warning">
+                    <i class="bi bi-eye"></i> Detay
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if adisyon %}
+        <div class="card mb-3 border-warning no-print">
+            <div class="card-body py-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        {% if adisyon.musteri %}
+                            <span class="badge bg-{% if adisyon.musteri.sadakat_seviyesi == 'Platin' %}dark{% elif adisyon.musteri.sadakat_seviyesi == 'Altın' %}warning{% elif adisyon.musteri.sadakat_seviyesi == 'Gümüş' %}secondary{% else %}secondary{% endif %} p-2">
+                                👑 {{ adisyon.musteri.sadakat_seviyesi }} ÜYE
+                            </span>
+                            <span class="ms-2">
+                                <i class="bi bi-star-fill text-warning"></i> Puan: {{ adisyon.musteri.sadakat_puani }}
+                            </span>
+                            {% if adisyon.musteri.dogum_gunu_indirimi %}
+                                <span class="badge bg-danger ms-2">🎂 DOĞUM GÜNÜ %20 İNDİRİM</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">
+                                <i class="bi bi-person"></i> Müşteri seçilmedi
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if adisyon.musteri %}
+                            <a href="{% url 'musteri_profil' adisyon.musteri.id %}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-person-badge"></i> Profil
+                            </a>
+                            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#indirimModal">
+                                <i class="bi bi-gift"></i> İndirimler
+                            </button>
+                        {% else %}
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#musteriEkleModal">
+                                <i class="bi bi-person-plus"></i> Müşteri Ekle
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if adisyon.musteri %}
+                <div class="mt-2 small">
+                    <span class="text-muted">Bu müşteri toplam {{ adisyon.musteri.toplam_harcama|floatformat:0 }} TL harcama yaptı.</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if adisyon and not adisyon.musteri %}
+        <div class="modal fade" id="musteriEkleModal" tabindex="-1" aria-labelledby="musteriEkleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="musteriEkleModalLabel">
+                            <i class="bi bi-person-plus"></i> Müşteri Ekle
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                    </div>
+                    <form method="post" action="{% url 'adisyon_musteri_ekle' adisyon.id %}">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Müşteri Seçin</label>
+                                <select name="musteri_id" class="form-select" required>
+                                    <option value="">Müşteri seçin...</option>
+                                    {% for musteri in musteriler %}
+                                        <option value="{{ musteri.id }}">{{ musteri.ad_soyad }} ({{ musteri.telefon }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="text-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i>
+                                    Müşteri listede yoksa <a href="{% url 'musteri_ekle' %}?sonraki={{ request.path }}" target="_blank">yeni müşteri oluşturun</a>
+                                </small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Müşteriyi Ekle
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if adisyon and adisyon.musteri %}
+        <div class="modal fade" id="indirimModal" tabindex="-1" aria-labelledby="indirimModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="indirimModalLabel">
+                            <i class="bi bi-gift"></i> {{ adisyon.musteri.ad_soyad }} - Kişiye Özel İndirimler
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% with kisisel_indirimler=adisyon.musteri.kisisel_indirimler.all %}
+                            {% if kisisel_indirimler %}
+                                <p class="mb-3 text-muted">Kullanılabilir indirimleriniz:</p>
+                                <div class="row">
+                                    {% for indirim in kisisel_indirimler %}
+                                        {% if indirim.aktif %}
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card h-100 border-{% if indirim.tip == 'yuzde' %}success{% else %}primary{% endif %} shadow-sm">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                        <h6 class="card-title fw-bold">
+                                                            {% if indirim.tip == 'yuzde' %}
+                                                                <span class="badge bg-success">%{{ indirim.deger }} İndirim</span>
+                                                            {% else %}
+                                                                <span class="badge bg-primary">{{ indirim.deger }} TL İndirim</span>
+                                                            {% endif %}
+                                                        </h6>
+                                                        {% if indirim.max_kullanim > 0 %}
+                                                            <span class="badge bg-info">Kalan: {{ indirim.kullanilan|default:0 }} / {{ indirim.max_kullanim }}</span>
+                                                        {% endif %}
+                                                    </div>
+
+                                                    <p class="card-text small mb-2">{{ indirim.aciklama|default:"İndirim açıklaması yok" }}</p>
+
+                                                    <div class="small text-muted mb-3">
+                                                        <i class="bi bi-cash"></i> Min. Harcama: {{ indirim.min_harcama }} TL<br>
+                                                        {% if indirim.gecerlilik_tarihi %}
+                                                            <i class="bi bi-calendar"></i> Son: {{ indirim.gecerlilik_tarihi|date:"d.m.Y" }}
+                                                        {% endif %}
+                                                    </div>
+
+                                                    <form method="post" action="{% url 'kisisel_indirim_uygula' indirim.id adisyon.id %}" class="mt-2">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-sm btn-success w-100"
+                                                                onclick="return confirm('{% if indirim.tip == 'yuzde' %}{{ indirim.deger }}%{% else %}{{ indirim.deger }} TL{% endif %} indirim uygulanacak. Onaylıyor musunuz?')">
+                                                            <i class="bi bi-check-circle"></i> İndirimi Uygula
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <i class="bi bi-emoji-frown display-1 text-muted"></i>
+                                    <h5 class="mt-3 text-muted">Kullanılabilir indirim bulunmuyor</h5>
+                                    <p class="text-muted">{{ adisyon.musteri.ad_soyad }} için henüz kişisel indirim tanımlanmamış.</p>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Kapat
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="no-print mb-4">
+            <ul class="nav nav-pills mb-3 pb-2" id="pills-tab" role="tablist">
+                {% for kat in kategoriler %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link {% if forloop.first %}active{% endif %}"
+                            id="tab-{{ kat.id }}"
+                            data-bs-toggle="pill"
+                            data-bs-target="#content-{{ kat.id }}"
+                            type="button"
+                            role="tab">
+                        {{ kat.ad }}
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <div class="tab-content" id="pills-tabContent">
+                {% for kat in kategoriler %}
+                <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="content-{{ kat.id }}" role="tabpanel">
+                    <div class="row g-2">
+                        {% for urun in kat.urunler.all %}
+                        <div class="col-4 col-md-2">
+                            <button type="button"
+        onclick="urunTiklandi({{ urun.id }}, this)"
+        class="menu-card w-100 p-0 text-center border-0 h-100 shadow-sm"
+        data-urun-ad="{{ urun.ad }}"
+        data-secenekli="{% if urun.secenek_gruplari.count > 0 %}1{% else %}0{% endif %}"
+        data-secenekler='[
+            {% for grup in urun.secenek_gruplari.all %}
+            {
+                "ad": "{{ grup.ad|escapejs }}",
+                "zorunlu": {{ grup.zorunlu_mu|yesno:"true,false" }},
+                "coklu": {{ grup.coklu_secim|yesno:"true,false" }},
+                "secenekler": [
+                    {% for s in grup.secenekler.all %}
+                    {
+                        "id": {{ s.id }},
+                        "ad": "{{ s.ad|escapejs }}",
+                        "fiyat": {{ s.fiyat_farki|default:0 }}
+                    }{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]'>
+                                {% if urun.gorsel %}
+                                    <img src="{{ urun.gorsel.url }}" class="menu-img" loading="lazy" alt="{{ urun.ad }}">
+                                {% else %}
+                                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 80px; font-size: 0.6rem;">FOTO YOK</div>
+                                {% endif %}
+                                <div class="p-2">
+                                    <div class="fw-bold text-dark" style="font-size: 0.7rem; height: 2.4em; overflow: hidden; line-height: 1.2em;">
+                                        {{ urun.ad }}
+                                    </div>
+                                    <div class="small fw-bold" style="color: var(--elaki-teal);">
+                                        {{ urun.fiyat }} TL
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if adisyon %}
+        <div class="text-center no-print mb-3">
+            <a id="btn-mutfak-gonder"
+               href="{% url 'toplu_mutfak_yazdir' adisyon.id %}"
+               class="btn btn-outline-success fw-bold px-4 py-2"
+               style="font-size: 0.95rem;">
+                <i class="bi bi-printer me-2"></i>Mutfaga / Bara Gonder
+            </a>
+        </div>
+        <div class="card no-print mb-4 border-warning shadow-sm">
+            <div class="card-body p-2">
+                <form action="{% url 'masa_tasi_birlestir' adisyon.id %}" method="post" class="row g-2 align-items-center">
+                    {% csrf_token %}
+                    <div class="col-7">
+                        <select name="hedef_masa_id" class="form-select form-select-sm" required>
+                            <option value="">Taşı/Birleştir...</option>
+                            {% for m in diger_masalar %}
+                                <option value="{{ m.id }}">Masa {{ m.masa_no }} {% if m.dolu_mu %}(Birleştir){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-5">
+                        <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold">AKTAR</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <div id="yazdirilacak-alan" class="fis-tasarim mb-4">
+            <div class="fis-header">
+                <div>
+                    <div class="fis-baslik">{{ sube.ad|upper }}</div>
+                    <div class="fis-meta">
+                        Elaki Yönetim Sistemleri<br>
+                        {{ sube.adres|default:"-" }}<br>
+                        Masa: <strong>{{ masa.masa_no }}</strong><br>
+                        Garson: <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+                    </div>
+                </div>
+
+                <div class="fis-meta text-md-end">
+                    Fiş No: <strong id="fis-no">{% if adisyon %}{{ adisyon.id }}{% else %}-{% endif %}</strong><br>
+                    Tarih: <strong>{% if adisyon %}{{ adisyon.acilis_zamani|date:"d.m.Y H:i" }}{% else %}-{% endif %}</strong>
+                </div>
+            </div>
+
+            <table class="fis-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">Ürün</th>
+                        <th style="text-align:center;">Adet</th>
+                        <th style="text-align:right;">Birim</th>
+                        <th style="text-align:right;">Toplam</th>
+                        <th style="text-align:right;" class="no-print">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="adisyon-body">
+                    {% if adisyon %}
+                        {% for item in adisyon.siparisler.all %}
+                        <tr class="fis-row" data-id="{{ item.id }}">
+                            <td>
+    <span class="urun-adi">{{ item.urun.ad }}</span>
+
+    {% for ss in item.secenekler.all %}
+        <span class="urun-detay">+ {{ ss.secenek.ad }}</span>
+    {% endfor %}
+
+    {% if item.ozel_istek %}
+        <span class="urun-detay">{{ item.ozel_istek }}</span>
+        <span class="mini-badge note">Not var</span>
+    {% endif %}
+
+    {% if item.ikram_mi %}
+        <div><span class="mini-badge ikram">İkram</span></div>
+    {% endif %}
+</td>
+
+                            <td class="text-center adet fw-bold">{{ item.adet }}</td>
+                            <td class="text-end">{{ item.urun.fiyat|floatformat:2 }} ₺</td>
+                            <td class="text-end toplam fw-bold">{{ item.toplam_fiyat|floatformat:2 }} ₺</td>
+
+                            <td class="no-print text-end">
+                                <div class="product-actions">
+                                    <a href="{% url 'siparis_adet_azalt' item.id %}" class="product-action-btn text-primary" title="Azalt">
+                                        <i class="bi bi-dash-lg"></i>
+                                    </a>
+
+                                    <a href="{% url 'siparis_adet_artir' item.id %}" class="product-action-btn text-primary" title="Artır">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </a>
+
+                                    <button type="button"
+                                            class="product-action-btn action-label text-info js-note-btn"
+                                            title="Not"
+                                            data-item-id="{{ item.id }}"
+                                            data-urun="{{ item.urun.ad|escape }}"
+                                            data-note="{{ item.ozel_istek|default:''|escape }}"
+                                            data-action="{% url 'siparis_ozel_istek' item.id %}">
+                                        Not
+                                    </button>
+
+                                    <a href="{% url 'ikram_yap' item.id %}" class="product-action-btn action-label text-warning" title="İkram">
+                                        İkram
+                                    </a>
+
+                                    <a href="{% url 'siparis_sil' item.id %}" class="product-action-btn action-label text-danger" title="İptal">
+                                        İptal
+                                    </a>
+                                </div>
+
+                                <div class="durum mt-2">
+                                    {% if item.hazir_mi %}
+                                        <span class="badge bg-success">HAZIR</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">BEKLİYOR</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">Adisyon henüz boş.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+            <div class="fis-ozet">
+                <div class="fis-ozet-satir">
+                    <span>Ara Toplam</span>
+                    <span id="ara-toplam">{% if adisyon %}{{ adisyon.ara_toplam|floatformat:2 }} ₺{% else %}0.00 ₺{% endif %}</span>
+                </div>
+
+                <div id="indirim-row"
+                     class="fis-ozet-satir"
+                     style="display: {% if adisyon and adisyon.indirim_tutari > 0 %}flex{% else %}none{% endif %}; color:#dc3545;">
+                    <span>İndirim</span>
+                    <span id="indirim-tutari">{% if adisyon %}-{{ adisyon.indirim_tutari|floatformat:2 }} ₺{% else %}-0.00 ₺{% endif %}</span>
+                </div>
+
+                <div class="fis-ozet-toplam">
+                    <span>TOPLAM</span>
+                    <span id="genel-toplam">{% if adisyon %}{{ adisyon.toplam_tutar|floatformat:2 }} ₺{% else %}0.00 ₺{% endif %}</span>
+                </div>
+
+                <div class="fis-ozet-satir mt-3">
+                    <span>Nakit</span>
+                    <span id="nakit-odenen">{% if adisyon %}{{ adisyon.nakit_odenen|default:"0.00"|floatformat:2 }} ₺{% else %}0.00 ₺{% endif %}</span>
+                </div>
+
+                <div class="fis-ozet-satir">
+                    <span>Kart</span>
+                    <span id="kart-odenen">{% if adisyon %}{{ adisyon.kart_odenen|default:"0.00"|floatformat:2 }} ₺{% else %}0.00 ₺{% endif %}</span>
+                </div>
+
+                <div class="fis-ozet-satir" style="color:#198754;">
+                    <span>Para Üstü</span>
+                    <span id="para-ustu">
+                        {% if adisyon %}
+                            {{ adisyon.nakit_odenen|add:adisyon.kart_odenen|subtract:adisyon.toplam_tutar|floatformat:2 }} ₺
+                        {% else %}
+                            0.00 ₺
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <div class="text-center mt-4 text-muted" style="font-size: 0.85rem;">
+                İşletme Vergi No: 1234567890 · Yazarkasa No: 001<br>
+                Teşekkür ederiz
+            </div>
+        </div>
+<div class="text-center d-none">
+    <a id="btn-mutfak-gonder"
+       href="{% if adisyon %}{% url 'toplu_mutfak_yazdir' adisyon.id %}{% else %}#{% endif %}"
+       class="btn btn-outline-success fw-bold px-4 py-2 {% if not adisyon %}disabled{% endif %}"
+       style="font-size: 0.95rem;">
+        <i class="bi bi-printer me-2"></i>👨‍🍳 SİPARİŞLERİ MUTFAĞA/BARA GÖNDER
+    </a>
+</div>
+<br>
+                
+        {% if adisyon %}
+        <div class="no-print mb-4 mx-auto" style="max-width: 450px;">
+            <form action="{% url 'indirim_yap' adisyon.id %}" method="POST" class="input-group input-group-sm shadow-sm">
+                {% csrf_token %}
+                <span class="input-group-text bg-white text-danger fw-bold">TL</span>
+                <input type="text" name="indirim_tutari" class="form-control" placeholder="İndirim Tutarı (TL)" value="{{ adisyon.indirim_tutari|default_if_none:'' }}">
+                <button class="btn btn-danger" type="submit">TL İndirimi Uygula</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <div id="alt-aksiyon-alani" class="no-print mx-auto mb-5" style="max-width: 450px;">
+            <div id="odeme-karti" class="card shadow border-0 rounded-4 overflow-hidden mb-4" {% if not adisyon %}style="display:none;"{% endif %}>
+                <div class="card-header text-white text-center py-3" style="background-color: #0E2A47;">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-cash-stack me-2"></i>ÖDEME TAHSİLATI</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form id="paymentForm" action="{% if adisyon %}{% url 'masa_kapat' adisyon.id %}{% else %}#{% endif %}" method="POST">
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <div class="col-12 text-center mb-2">
+                                <small class="text-muted d-block">Ödenmesi Gereken Toplam:</small>
+                                <h3 class="fw-bold" style="color: #0E2A47;" id="totalToPayBottom">
+                                    {% if adisyon %}{{ adisyon.toplam_tutar|floatformat:2 }} ₺{% else %}0.00 ₺{% endif %}
+                                </h3>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="small fw-bold text-muted">💵 NAKİT</label>
+                                <input type="text"
+                                       name="nakit_tutar"
+                                       id="nakit_input_bottom"
+                                       class="form-control form-control-lg border-2 text-success fw-bold"
+                                       value="{% if adisyon %}{{ adisyon.toplam_tutar|floatformat:2 }}{% else %}0.00{% endif %}"
+                                       oninput="calculateRemainingBottom('nakit')">
+                            </div>
+
+                            <div class="col-6">
+                                <label class="small fw-bold text-muted">💳 KART / POS</label>
+                                <input type="text"
+                                       name="kart_tutar"
+                                       id="kart_input_bottom"
+                                       class="form-control form-control-lg border-2 text-primary fw-bold"
+                                       value="0.00"
+                                       oninput="calculateRemainingBottom('kart')">
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <button type="submit"
+                                        class="btn btn-lg w-100 fw-bold shadow text-white"
+                                        style="background-color: #1DA1A1;"
+                                        onclick="return confirm('Tahsilat işlemi onaylanıyor mu?')">
+                                    HESABI KAPAT VE MASAYI BOŞALT
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                
+
+                <button id="btn-fis-yazdir"
+                        onclick="window.print();"
+                        class="btn btn-outline-warning btn-lg fw-bold py-3 {% if not adisyon %}disabled{% endif %}"
+                        {% if not adisyon %}disabled{% endif %}>
+                    <i class="bi bi-receipt me-2"></i>📄 MÜŞTERİ FİŞİ YAZDIR
+                </button>
+
+                <a href="{% url 'sube_detay' sube.id %}" class="btn btn-outline-secondary btn-lg fw-bold py-3">
+                    <i class="bi bi-arrow-left me-2"></i>GERİ DÖN
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ortak Not Modal -->
+    <div class="modal fade" id="ozelIstekModal" tabindex="-1" aria-labelledby="ozelIstekModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="ozelIstekModalLabel">Özel İstek Ekle</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+
+                <form method="post" id="ozelIstekForm" action="">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-2">
+                            <label class="form-label fw-bold" id="ozelIstekUrunLabel">Ürün</label>
+                            <textarea name="ozel_istek"
+                                      id="ozelIstekTextarea"
+                                      class="form-control"
+                                      rows="4"
+                                      placeholder="Örn: Az tuzlu, acısız, soğansız, pişimi orta..."></textarea>
+                        </div>
+
+                        <div class="small text-muted mb-2">Hızlı notlar:</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="quick-note-btn" onclick="notaEkle('Az tuzlu')">Az tuzlu</button>
+                            <button type="button" class="quick-note-btn" onclick="notaEkle('Acısız')">Acısız</button>
+                            <button type="button" class="quick-note-btn" onclick="notaEkle('Soğansız')">Soğansız</button>
+                            <button type="button" class="quick-note-btn" onclick="notaEkle('Sarımsaksız')">Sarımsaksız</button>
+                            <button type="button" class="quick-note-btn" onclick="notaEkle('İyi pişmiş')">İyi pişmiş</button>
+                            <button type="button" class="quick-note-btn" onclick="notaEkle('Az pişmiş')">Az pişmiş</button>
+                            <button type="button" class="quick-note-btn" onclick="notaTemizle()">Temizle</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                        <button type="submit" class="btn btn-info text-white">İsteği Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <audio id="notificationSound" preload="auto">
+        <source src="https://notificationsounds.com/storage/sounds/file-sounds-1150-pristine.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+    <script>
+        function paraYazdir(v) {
+            return Number(v || 0).toFixed(2) + " ₺";
+        }
+
+        function notaEkle(metin) {
+            const alan = document.getElementById('ozelIstekTextarea');
+            if (!alan) return;
+
+            let mevcut = alan.value.trim();
+            if (!mevcut) {
+                alan.value = metin;
+                return;
+            }
+
+            const parcalar = mevcut.split(',').map(x => x.trim().toLowerCase());
+            if (!parcalar.includes(metin.toLowerCase())) {
+                alan.value = mevcut + ', ' + metin;
+            }
+        }
+
+        function notaTemizle() {
+            const alan = document.getElementById('ozelIstekTextarea');
+            if (alan) alan.value = '';
+        }
+
+        function calculateRemainingBottom(source) {
+            const totalElement = document.getElementById('totalToPayBottom');
+            const total = parseFloat((totalElement ? totalElement.textContent : "0").replace('₺', '').replace('₺', '').replace(',', '.')) || 0;
+
+            const nakitInput = document.getElementById('nakit_input_bottom');
+            const kartInput = document.getElementById('kart_input_bottom');
+
+            if (!nakitInput || !kartInput) return;
+
+            if (source === 'nakit') {
+                let val = parseFloat(nakitInput.value.replace(',', '.')) || 0;
+                if (val > total) {
+                    nakitInput.value = total.toFixed(2);
+                    val = total;
+                }
+                kartInput.value = (total - val).toFixed(2);
+            } else {
+                let val = parseFloat(kartInput.value.replace(',', '.')) || 0;
+                if (val > total) {
+                    kartInput.value = total.toFixed(2);
+                    val = total;
+                }
+                nakitInput.value = (total - val).toFixed(2);
+            }
+        }
+function escapeHtml(text) {
+    return String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+function urunSatiriHtml(item) {
+    const urunAdi = escapeHtml(item.urun || '');
+    const ozelIstek = escapeHtml(item.ozel_istek || '');
+
+    const noteHtml = item.ozel_istek
+        ? `<span class="urun-detay">${ozelIstek}</span><span class="mini-badge note">Not var</span>`
+        : '';
+
+    const ikramHtml = item.ikram_mi
+        ? `<div><span class="mini-badge ikram">İkram</span></div>`
+        : '';
+
+    const durumHtml = item.hazir_mi
+        ? '<span class="badge bg-success">HAZIR</span>'
+        : '<span class="badge bg-secondary">BEKLİYOR</span>';
+
+    return `
+        <tr class="fis-row" data-id="${item.id}">
+            <td>
+                <span class="urun-adi">${urunAdi}</span>
+                ${noteHtml}
+                ${ikramHtml}
+            </td>
+
+            <td class="text-center adet fw-bold">${item.adet}</td>
+            <td class="text-end">${paraYazdir(item.fiyat)}</td>
+            <td class="text-end toplam fw-bold">${paraYazdir(item.toplam)}</td>
+
+            <td class="no-print text-end">
+                <div class="product-actions">
+                    <a href="${item.url_adet_azalt}" class="product-action-btn text-primary" title="Azalt">
+                        <i class="bi bi-dash-lg"></i>
+                    </a>
+
+                    <a href="${item.url_adet_artir}" class="product-action-btn text-primary" title="Artır">
+                        <i class="bi bi-plus-lg"></i>
+                    </a>
+
+                    <button type="button"
+                            class="product-action-btn action-label text-info js-note-btn"
+                            title="Not"
+                            data-item-id="${item.id}"
+                            data-urun="${urunAdi}"
+                            data-note="${ozelIstek}"
+                            data-action="${item.url_ozel_istek}">
+                        Not
+                    </button>
+
+                    <a href="${item.url_ikram}" class="product-action-btn action-label text-warning" title="İkram">
+                        İkram
+                    </a>
+
+                    <a href="${item.url_sil}" class="product-action-btn action-label text-danger" title="İptal">
+                        İptal
+                    </a>
+                </div>
+
+                <div class="durum mt-2">
+                    ${durumHtml}
+                </div>
+            </td>
+        </tr>
+    `;
+}
+
+        function urunEkle(urunId) {
+            fetch("{% url 'siparis_ekle' masa.id %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: "urun_id=" + urunId + "&adet=1"
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status !== "ok" || !data.item) return;
+
+                const item = data.item;
+                const body = document.getElementById("adisyon-body");
+                if (!body) return;
+
+                let mevcutSatir = body.querySelector(`tr[data-id="${item.id}"]`);
+
+                if (mevcutSatir) {
+                    const yeniSatir = urunSatiriHtml(item);
+                    mevcutSatir.outerHTML = yeniSatir;
+                } else {
+                    const bosSatir = body.querySelector('td[colspan="5"]');
+                    if (bosSatir) body.innerHTML = "";
+                    body.insertAdjacentHTML("beforeend", urunSatiriHtml(item));
+                }
+
+                if (data.adisyon_id) {
+                    const fisNo = document.getElementById("fis-no");
+                    if (fisNo) fisNo.textContent = data.adisyon_id;
+
+                    const odemeKarti = document.getElementById("odeme-karti");
+                    if (odemeKarti) odemeKarti.style.display = "block";
+
+                    const paymentForm = document.getElementById("paymentForm");
+                    if (paymentForm) {
+                        paymentForm.action = "/adisyon/" + data.adisyon_id + "/kapat/";
+                    }
+
+                    const btnMutfak = document.getElementById("btn-mutfak-gonder");
+                    if (btnMutfak) {
+                        btnMutfak.href = "/adisyon/" + data.adisyon_id + "/yazdir-mutfak/";
+                        btnMutfak.classList.remove("disabled");
+                    }
+
+                    const btnFis = document.getElementById("btn-fis-yazdir");
+                    if (btnFis) {
+                        btnFis.disabled = false;
+                        btnFis.classList.remove("disabled");
+                    }
+                }
+
+                const araToplam = document.getElementById("ara-toplam");
+                const genelToplam = document.getElementById("genel-toplam");
+                const totalToPay = document.getElementById("totalToPayBottom");
+                const nakitInput = document.getElementById("nakit_input_bottom");
+                const kartInput = document.getElementById("kart_input_bottom");
+
+                if (araToplam) araToplam.innerText = paraYazdir(data.ara_toplam);
+                if (genelToplam) genelToplam.innerText = paraYazdir(data.toplam_tutar);
+                if (totalToPay) totalToPay.innerText = Number(data.toplam_tutar).toFixed(2) + " ₺";
+
+                if (nakitInput && kartInput) {
+                    nakitInput.value = Number(data.toplam_tutar).toFixed(2);
+                    kartInput.value = "0.00";
+                }
+            })
+           .catch(err => {
+    console.error("Ürün ekleme hatası:", err);
+    alert("Ürün eklenirken hata oluştu. Konsolu kontrol et.");
+});
+}
+
+
+
+        function checkNotifications() {
+            const subeId = "{{ sube.id }}";
+
+            fetch(`/api/bildirim/${subeId}/`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        const sound = document.getElementById("notificationSound");
+                        if (sound) {
+                            sound.play().catch(() => {});
+                        }
+
+                        let msg = "";
+
+                        data.forEach(item => {
+                            if (item.tur === "cagri") {
+                                msg += "🙋 GARSON ÇAĞRISI - Masa " + item.masa + "\n";
+                            }
+                            if (item.tur === "yemek") {
+                                msg += "🍽 YEMEK HAZIR - Masa " + item.masa + "\n";
+                            }
+                        });
+
+                        alert(msg);
+                        location.reload();
+                    }
+                })
+                .catch(err => console.log("Bildirim hatası:", err));
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const activeTabId = localStorage.getItem('lastCategoryTab');
+            if (activeTabId) {
+                const tabTriggerEl = document.querySelector(`#${activeTabId}`);
+                if (tabTriggerEl) {
+                    const tab = new bootstrap.Tab(tabTriggerEl);
+                    tab.show();
+                }
+            }
+
+            const tabEls = document.querySelectorAll('button[data-bs-toggle="pill"]');
+            tabEls.forEach(t => t.addEventListener('shown.bs.tab', e => {
+                localStorage.setItem('lastCategoryTab', e.target.id);
+            }));
+
+            const total = parseFloat("{{ adisyon.toplam_tutar|default:0 }}".replace(',', '.')) || 0;
+            const nakitInput = document.getElementById('nakit_input_bottom');
+            const kartInput = document.getElementById('kart_input_bottom');
+
+            if (nakitInput && kartInput) {
+                nakitInput.value = total.toFixed(2);
+                kartInput.value = "0.00";
+            }
+
+            document.body.addEventListener('click', function() {
+                const s = document.getElementById('notificationSound');
+                if (s) {
+                    s.muted = true;
+                    s.play().then(() => {
+                        s.pause();
+                        s.muted = false;
+                    }).catch(() => {});
+                }
+            }, { once: true });
+
+            document.addEventListener('click', function (e) {
+                const btn = e.target.closest('.js-note-btn');
+                if (!btn) return;
+
+                const form = document.getElementById('ozelIstekForm');
+                const textarea = document.getElementById('ozelIstekTextarea');
+                const label = document.getElementById('ozelIstekUrunLabel');
+
+                if (form) form.action = btn.dataset.action || '';
+                if (textarea) textarea.value = btn.dataset.note || '';
+                if (label) label.textContent = 'Ürün: ' + (btn.dataset.urun || '');
+
+                const modalEl = document.getElementById('ozelIstekModal');
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+            });
+
+            setInterval(checkNotifications, 3000);
+            checkNotifications();
+        });
+
+let aktifUrunId = null;
+const aktifMasaId = {{ masa.id }};
+function urunTiklandi(urunId, btn) {
+    let secenekler = [];
+
+    try {
+        secenekler = JSON.parse(btn.dataset.secenekler || "[]");
+    } catch (e) {
+        console.error("Seçenek JSON parse hatası:", e, btn.dataset.secenekler);
+        secenekler = [];
+    }
+
+    const secenekli = secenekler.length > 0;
+
+    console.log("Ürün tıklandı:", {
+        urunId: urunId,
+        urunAd: btn.dataset.urunAd,
+        secenekli: secenekli,
+        secenekler: secenekler
+    });
+
+    if (!secenekli) {
+        urunEkle(urunId);
+        return;
+    }
+
+    aktifUrunId = urunId;
+
+    const urunAd = btn.dataset.urunAd || "Ürün";
+    document.getElementById("secenekModalTitle").innerText = urunAd;
+
+    let html = "";
+
+    secenekler.forEach((grup, gIndex) => {
+        html += `<div class="mb-3">
+                    <div class="fw-bold mb-2">
+                        ${grup.ad}
+                        ${grup.zorunlu ? '<span class="text-danger ms-1">*</span>' : ''}
+                    </div>`;
+
+        grup.secenekler.forEach(sec => {
+            const inputType = grup.coklu ? "checkbox" : "radio";
+            const name = `grup_${gIndex}`;
+
+            html += `
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="${inputType}"
+                           name="${name}"
+                           value="${sec.id}">
+                    <label class="form-check-label">
+                        ${sec.ad} ${Number(sec.fiyat || 0) > 0 ? `(+${Number(sec.fiyat).toFixed(2)} ₺)` : ""}
+                    </label>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+    });
+
+    if (!secenekler.length) {
+        alert("Bu ürüne ait seçenek grubu bulunamadı.");
+        return;
+    }
+
+    document.getElementById("secenekModalBody").innerHTML = html;
+
+    const modalEl = document.getElementById("secenekModal");
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+}
+function secenekleriOnayla() {
+    const secilenler = [];
+
+    document.querySelectorAll("#secenekModalBody input:checked").forEach(el => {
+        secilenler.push(el.value);
+    });
+
+fetch("{% url 'siparis_ekle' masa.id %}", {
+                method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: "urun_id=" + aktifUrunId + "&adet=1" + 
+      (secilenler.length ? "&secenekler=" + secilenler.join("&secenekler=") : "")
+    })
+    .then(res => res.json())
+    .then(data => location.reload());
+}
+    </script>
+    <div class="modal fade" id="secenekModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="secenekModalTitle">Ürün Seç</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body" id="secenekModalBody"></div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button class="btn btn-success" onclick="secenekleriOnayla()">Ekle</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

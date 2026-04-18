@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+
+{% block title %}Masa Yönetimi - ELAKİ{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="bi bi-grid-3x3-gap-fill"></i> Masa Yönetimi
+        </h2>
+        <a href="{% url 'yonetim_paneli' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Kontrol Paneline Dön
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="alert-container mb-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <i class="bi bi-{% if message.tags == 'error' %}exclamation-circle{% else %}check-circle{% endif %}"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- SOL PANEL: Şube Seçimi ve Masa Listesi -->
+        <div class="col-lg-8">
+            <!-- Şube Seçimi -->
+            {% if subeler %}
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-shop"></i> Şube Seçin</h5>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group-vertical w-100" role="group">
+                        {% for sube in subeler %}
+                        <a href="{% url 'masa_yonetim_listesi' %}?sube_id={{ sube.id }}"
+                           class="btn btn-outline-primary text-start {% if secili_sube.id == sube.id %}btn-primary{% endif %}"
+                           style="border: 1px solid #dee2e6; padding: 12px; text-align: left;">
+                            <i class="bi bi-shop"></i> <strong>{{ sube.ad }}</strong>
+                            <span class="badge bg-secondary float-end">{{ sube.masalar.count }} masa</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i> Henüz şube tanımlanmamış.
+            </div>
+            {% endif %}
+
+            <!-- Mevcut Masalar -->
+            {% if secili_sube %}
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ul"></i> 
+                        {{ secili_sube.ad }} - Mevcut Masalar
+                        <span class="badge bg-white text-success float-end">{{ masalar|length }} masa</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if masalar %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Masa No</th>
+                                    <th>Kapasite</th>
+                                    <th>Durum</th>
+                                    <th class="text-end">İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for masa in masalar %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td><strong>{{ masa.masa_no }}</strong></td>
+                                    <td>
+                                        <i class="bi bi-person-fill"></i> {{ masa.kapasite }} kişi
+                                    </td>
+                                    <td>
+                                        {% if masa.dolu_mu %}
+                                        <span class="badge bg-danger">Dolu</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Boş</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <form method="POST" action="{% url 'masa_sil' masa.id %}" style="display: inline;"
+                                              onsubmit="return confirm('{{ masa.masa_no }} masası silinecek. Emin misiniz?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash"></i> Sil
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle"></i> Bu şubede henüz masa eklenmemiş.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- SAĞ PANEL: Masa Ekleme Formu -->
+        <div class="col-lg-4">
+            {% if secili_sube %}
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-plus-circle"></i> Yeni Masa Ekle
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="needs-validation">
+                        {% csrf_token %}
+                        <input type="hidden" name="sube_id" value="{{ secili_sube.id }}">
+                        <input type="hidden" name="ekle" value="1">
+
+                        <!-- Masa Numarası -->
+                        <div class="mb-3">
+                            <label for="id_masa_no" class="form-label">
+                                <i class="bi bi-hash"></i> Masa Numarası
+                            </label>
+                            <input type="text" 
+                                   class="form-control {% if form.masa_no.errors %}is-invalid{% endif %}"
+                                   id="id_masa_no" 
+                                   name="masa_no" 
+                                   placeholder="Örn: 1, 2A, VIP01"
+                                   required>
+                            <small class="form-text text-muted d-block mt-1">
+                                Benzersiz bir masa numarası girin (1-10 karakter)
+                            </small>
+                            {% if form.masa_no.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.masa_no.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Kapasite -->
+                        <div class="mb-3">
+                            <label for="id_kapasite" class="form-label">
+                                <i class="bi bi-people-fill"></i> Kapasite (Kişi Sayısı)
+                            </label>
+                            <input type="number" 
+                                   class="form-control {% if form.kapasite.errors %}is-invalid{% endif %}"
+                                   id="id_kapasite" 
+                                   name="kapasite" 
+                                   value="4"
+                                   min="1" 
+                                   max="100"
+                                   required>
+                            <small class="form-text text-muted d-block mt-1">
+                                Masa kaç kişi oturtabilir? (1-100)
+                            </small>
+                            {% if form.kapasite.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.kapasite.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Buton -->
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-plus-lg"></i> Masa Ekle
+                        </button>
+                    </form>
+
+                    <!-- Hızlı Ekle Önerileri -->
+                    <hr class="my-3">
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">
+                            <i class="bi bi-lightning-fill"></i> Hızlı Ekleme
+                        </label>
+                        <div class="d-flex flex-column gap-2">
+                            {% for masa_no in "1,2,3,4,5,6,7,8,9,10" %}
+                            <button type="button" class="btn btn-sm btn-outline-secondary btn-quick-add" 
+                                    data-masa-no="Masa {{ masa_no }}" data-kapasite="4">
+                                {{ masa_no }}. Masa (+4 kişi)
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- İpuçları -->
+            <div class="card mt-3 border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-lightbulb"></i> İpuçları</h6>
+                </div>
+                <div class="card-body small">
+                    <ul class="mb-0">
+                        <li>Masa numarası benzersiz olmalıdır</li>
+                        <li>Açık adisyonu olan masalar silinemez</li>
+                        <li>Kapasite 1-100 kişi arasında olmalıdır</li>
+                        <li>Hızlı ekleme ile birden fazla masa oluşturabilirsiniz</li>
+                    </ul>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i> Masa eklemek için lütfen soldan bir şube seçin.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.btn-quick-add');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const masaNo = this.dataset.masaNo;
+            const kapasite = this.dataset.kapasite;
+            
+            document.getElementById('id_masa_no').value = masaNo;
+            document.getElementById('id_kapasite').value = kapasite;
+            
+            // Form'u submit et
+            const form = document.querySelector('form');
+            if (form) {
+                form.submit();
+            }
+        });
+    });
+});
+</script>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+    
+    .btn-group-vertical .btn {
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn-quick-add {
+        transition: all 0.2s ease;
+    }
+    
+    .btn-quick-add:hover {
+        transform: translateX(2px);
+        background-color: #0d6efd;
+        color: white;
+    }
+</style>
+{% endblock %}

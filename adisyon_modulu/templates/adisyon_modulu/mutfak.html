@@ -1,0 +1,799 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>{{ bolge.ad }} Mutfak Ekranı - ELAKİ</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+
+   <style>
+        :root {
+            --navy: #0E2A47;
+            --teal: #1DA1A1;
+            --bg: #0f1115;
+            --card: #171b22;
+            --card-2: #1d232c;
+            --line: #2b3340;
+            --text: #f5f7fa;
+            --muted: #9aa5b1;
+            --warn: #ffc107;
+            --danger: #dc3545;
+            --success: #198754;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background: linear-gradient(180deg, #0b0e13 0%, #10141b 100%);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(13, 17, 23, 0.92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .topbar-inner {
+            padding: 16px 0;
+        }
+
+        .brand-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(29, 161, 161, 0.12);
+            color: #d9ffff;
+            border: 1px solid rgba(29, 161, 161, 0.25);
+            font-weight: 700;
+        }
+
+        .metric-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 18px;
+            padding: 14px 16px;
+            min-height: 88px;
+        }
+
+        .metric-label {
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .subtle {
+            color: var(--muted);
+        }
+
+        .control-panel {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 14px;
+        }
+
+        .btn-filter {
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #fff;
+            background: transparent;
+            padding: 10px 14px;
+            font-weight: 600;
+        }
+
+        .btn-filter.active,
+        .btn-filter:hover {
+            background: var(--teal);
+            border-color: var(--teal);
+            color: #fff;
+        }
+
+        .station-board {
+            padding: 24px 0 36px;
+        }
+
+        .group-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+            height: 100%;
+        }
+
+        .group-card.urgent {
+            border-color: rgba(220, 53, 69, 0.45);
+            box-shadow: 0 0 0 1px rgba(220, 53, 69, 0.18), 0 14px 34px rgba(220, 53, 69, 0.14);
+        }
+
+        .group-card.warning {
+            border-color: rgba(255, 193, 7, 0.38);
+            box-shadow: 0 0 0 1px rgba(255, 193, 7, 0.14), 0 14px 34px rgba(255, 193, 7, 0.12);
+        }
+
+        .card-head {
+            display: flex;
+            align-items: start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+
+        .table-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(29, 161, 161, 0.16);
+            border: 1px solid rgba(29, 161, 161, 0.28);
+            color: #eaffff;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        .timer-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .timer-pill.warning {
+            background: rgba(255, 193, 7, 0.12);
+            color: #ffe08a;
+        }
+
+        .timer-pill.urgent {
+            background: rgba(220, 53, 69, 0.14);
+            color: #ff9ca8;
+        }
+
+        .meta-line {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            color: var(--muted);
+            font-size: 0.92rem;
+            margin-bottom: 14px;
+        }
+
+        .order-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .order-item {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 18px;
+            padding: 14px;
+        }
+
+        .order-item.ready {
+            opacity: 0.55;
+        }
+
+        .item-top {
+            display: flex;
+            align-items: start;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .item-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .item-qty {
+            color: var(--warn);
+            font-weight: 900;
+            margin-right: 8px;
+        }
+
+        .item-note {
+            margin-top: 8px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(255,193,7,0.10);
+            border: 1px solid rgba(255,193,7,0.16);
+            color: #ffe59d;
+            font-size: 0.95rem;
+        }
+
+        .item-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .item-id {
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .ready-btn, .print-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .ready-btn {
+            background: var(--success);
+            color: white;
+        }
+
+        .ready-btn:hover {
+            background: #157347;
+            color: white;
+        }
+
+        .print-btn {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .print-btn:hover {
+            background: rgba(255,255,255,0.14);
+            color: #fff;
+        }
+
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            border-radius: 24px;
+            background: rgba(255,255,255,0.03);
+            border: 1px dashed rgba(255,255,255,0.10);
+        }
+
+        .connection-badge {
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .connection-live {
+            background: rgba(25, 135, 84, 0.14);
+            color: #9ef0bb;
+            border: 1px solid rgba(25, 135, 84, 0.22);
+        }
+
+        .connection-polling {
+            background: rgba(255, 193, 7, 0.12);
+            color: #ffe08a;
+            border: 1px solid rgba(255, 193, 7, 0.20);
+        }
+
+        .connection-offline {
+            background: rgba(220, 53, 69, 0.14);
+            color: #ffb2bb;
+            border: 1px solid rgba(220, 53, 69, 0.22);
+        }
+
+        .muted-link {
+            color: #d8dde5;
+            text-decoration: none;
+        }
+
+        .muted-link:hover {
+            color: white;
+        }
+
+        .fade-highlight {
+            animation: pulseOnce 1.2s ease;
+        }
+
+        @keyframes pulseOnce {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(29,161,161,0); }
+            50% { transform: scale(1.01); box-shadow: 0 0 0 5px rgba(29,161,161,0.10); }
+            100% { transform: scale(1); box-shadow: 0 0 0 rgba(29,161,161,0); }
+        }
+
+        @media (max-width: 991px) {
+            .metric-value { font-size: 1.35rem; }
+            .item-title { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="container-fluid topbar-inner">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                <div class="d-flex flex-column gap-2">
+                    <div class="brand-chip">
+                        <i class="bi bi-fire"></i>
+                        {{ bolge.sube.ad|upper }} · {{ bolge.ad }} MUTFAK
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <span id="connectionBadge" class="connection-badge connection-polling">
+                            <i class="bi bi-arrow-repeat"></i> Senkron bekleniyor
+                        </span>
+                        <span class="subtle">Son güncelleme: <strong id="lastUpdateLabel">-</strong></span>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <div class="text-end me-2">
+                        <div class="fw-bold fs-4" id="clock">--:--:--</div>
+                        <div class="subtle small">Canlı mutfak ekranı</div>
+                    </div>
+                    <a href="{% url 'mutfak_ana_sayfa' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" class="btn btn-outline-light rounded-pill">
+                        <i class="bi bi-grid"></i> Bölge Değiştir
+                    </a>
+                    <a href="{{ back_url }}" class="btn btn-outline-warning rounded-pill">
+                        <i class="bi bi-arrow-left-circle"></i> Yonetim Paneli
+                    </a>
+                    <button type="button" class="btn btn-outline-info rounded-pill" onclick="refreshBoard(true)">
+                        <i class="bi bi-arrow-clockwise"></i> Yenile
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-1">
+                <div class="col-6 col-lg-3">
+                    <div class="metric-card">
+                        <div class="metric-label">Bekleyen masa</div>
+                        <div class="metric-value" id="metricTables">0</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="metric-card">
+                        <div class="metric-label">Bekleyen ürün</div>
+                        <div class="metric-value" id="metricItems">0</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="metric-card">
+                        <div class="metric-label">Ortalama bekleme</div>
+                        <div class="metric-value" id="metricAverage">0 dk</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="metric-card">
+                        <div class="metric-label">En eski sipariş</div>
+                        <div class="metric-value" id="metricOldest">0 dk</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid station-board">
+        <div class="control-panel mb-4">
+            <div class="d-flex flex-column flex-xl-row justify-content-between gap-3 align-items-xl-center">
+                <div class="d-flex flex-wrap gap-2" id="filterRow">
+                    <button class="btn-filter active" data-filter="all">Tümü</button>
+                    <button class="btn-filter" data-filter="normal">Normal</button>
+                    <button class="btn-filter" data-filter="warning">10+ dk</button>
+                    <button class="btn-filter" data-filter="urgent">20+ dk</button>
+                </div>
+
+                <div class="d-flex flex-column flex-md-row gap-2 align-items-md-center">
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-light"><i class="bi bi-search"></i></span>
+                        <input id="searchInput" type="text" class="form-control bg-dark border-secondary text-light"
+                               placeholder="Masa veya ürün ara...">
+                    </div>
+                    <div class="form-check form-switch ms-md-2">
+                        <input class="form-check-input" type="checkbox" id="soundToggle" checked>
+                        <label class="form-check-label subtle" for="soundToggle">Sesli uyarı</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="boardContent">
+            {% regroup siparisler by adisyon.id as adisyon_gruplari %}
+            {% if adisyon_gruplari %}
+            <div class="row g-4" id="groupBoard">
+                {% for grup in adisyon_gruplari %}
+                    {% with first_item=grup.list.0 %}
+                    <div class="col-12 col-md-6 col-xl-4 board-group"
+                         data-table="{{ first_item.adisyon.masa.masa_no|default:'Paket' }}"
+                         data-search="{% for item in grup.list %}{{ item.urun.ad }} {% endfor %}">
+                        <div class="group-card"
+                             data-group-id="{{ grup.grouper }}"
+                             data-open-time="{{ first_item.adisyon.acilis_zamani|date:'c' }}">
+                            <div class="card-head">
+                                <div>
+                                    <div class="table-chip">
+                                        <i class="bi bi-grid-3x3-gap-fill"></i>
+                                        {% if first_item.adisyon.masa %}
+                                            MASA {{ first_item.adisyon.masa.masa_no }}
+                                        {% else %}
+                                            PAKET / MASASIZ
+                                        {% endif %}
+                                    </div>
+                                    <div class="meta-line mt-3">
+                                        <span><i class="bi bi-hash"></i> Adisyon #{{ first_item.adisyon.id }}</span>
+                                        <span><i class="bi bi-clock-history"></i> {{ first_item.adisyon.acilis_zamani|date:"H:i" }}</span>
+                                        <span><i class="bi bi-basket"></i> {{ grup.list|length }} kalem</span>
+                                    </div>
+                                </div>
+                                <div class="timer-pill wait-timer" data-open-time="{{ first_item.adisyon.acilis_zamani|date:'c' }}">
+                                    <i class="bi bi-alarm"></i>
+                                    <span class="timer-text">0 dk</span>
+                                </div>
+                            </div>
+
+                            <div class="order-list">
+                                {% for item in grup.list %}
+                                <div class="order-item" data-item-id="{{ item.id }}">
+                                    <div class="item-top">
+                                        <div>
+                                            <div class="item-title">
+                                                <span class="item-qty">{{ item.adet }}x</span>{{ item.urun.ad }}
+                                            </div>
+                                            {% if item.ozel_istek %}
+                                            <div class="item-note">
+                                                <i class="bi bi-chat-left-text"></i>
+                                                {{ item.ozel_istek }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="item-footer">
+                                        <div class="item-id">
+                                            Sipariş ID: #{{ item.id }}
+                                        </div>
+                                        <div class="action-row">
+                                            <a href="{% url 'siparis_hazir_isaretle' item.id %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" class="ready-btn">
+                                                <i class="bi bi-check2-circle"></i> Hazırlandı
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endwith %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state" id="emptyState">
+                <div class="display-2 mb-3">🍽️</div>
+                <h2 class="mb-2">Hazırlanacak sipariş bulunmuyor</h2>
+                <p class="subtle mb-0">Yeni sipariş geldiğinde ekran otomatik yenilenir.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <audio id="notifSound" preload="auto">
+        <source src="https://notificationsounds.com/storage/sounds/file-sounds-1150-pristine.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const bolgeId = "{{ bolge.id|default:'' }}";
+        const liveUpdatesEnabled = "{{ live_updates_enabled|yesno:'true,false' }}" === "true";
+        let socket = null;
+        let pollingHandle = null;
+        let lastBoardSignature = null;
+
+        function updateClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('tr-TR', { hour12: false });
+            document.getElementById('clock').textContent = time;
+        }
+
+        function minutesFrom(dateStr) {
+            if (!dateStr) return 0;
+            const date = new Date(dateStr);
+            const now = new Date();
+            return Math.max(0, Math.floor((now - date) / 60000));
+        }
+
+        function updateTimersAndPriorities() {
+            const groupCards = document.querySelectorAll('.group-card');
+            let oldest = 0;
+            let total = 0;
+            let count = 0;
+
+            groupCards.forEach(card => {
+                const openTime = card.dataset.openTime;
+                const mins = minutesFrom(openTime);
+                oldest = Math.max(oldest, mins);
+                total += mins;
+                count += 1;
+
+                card.classList.remove('warning', 'urgent');
+
+                const timer = card.querySelector('.wait-timer');
+                if (timer) {
+                    const textEl = timer.querySelector('.timer-text');
+                    if (textEl) textEl.textContent = `${mins} dk`;
+
+                    timer.classList.remove('warning', 'urgent');
+
+                    if (mins >= 20) {
+                        card.classList.add('urgent');
+                        timer.classList.add('urgent');
+                    } else if (mins >= 10) {
+                        card.classList.add('warning');
+                        timer.classList.add('warning');
+                    }
+                }
+            });
+
+            const groupsVisible = document.querySelectorAll('.board-group:not([style*="display: none"])').length;
+            const totalItems = document.querySelectorAll('.order-item').length;
+            const avg = count ? Math.round(total / count) : 0;
+
+            document.getElementById('metricTables').textContent = groupsVisible;
+            document.getElementById('metricItems').textContent = totalItems;
+            document.getElementById('metricAverage').textContent = `${avg} dk`;
+            document.getElementById('metricOldest').textContent = `${oldest} dk`;
+        }
+
+        function getPriority(groupEl) {
+            const card = groupEl.querySelector('.group-card');
+            if (!card) return 'normal';
+            if (card.classList.contains('urgent')) return 'urgent';
+            if (card.classList.contains('warning')) return 'warning';
+            return 'normal';
+        }
+
+        function applyFilters() {
+            const activeBtn = document.querySelector('.btn-filter.active');
+            const filter = activeBtn ? activeBtn.dataset.filter : 'all';
+            const term = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+
+            const groups = document.querySelectorAll('.board-group');
+            let visible = 0;
+
+            groups.forEach(group => {
+                const priority = getPriority(group);
+                const searchText = `${group.dataset.table || ''} ${group.dataset.search || ''}`.toLowerCase();
+
+                let show = (filter === 'all' || filter === priority);
+                if (term && !searchText.includes(term)) show = false;
+
+                group.style.display = show ? '' : 'none';
+                if (show) visible += 1;
+            });
+
+            const emptyState = document.getElementById('emptyState');
+            const board = document.getElementById('groupBoard');
+
+            if (board) {
+                board.style.display = visible > 0 ? '' : 'none';
+            }
+
+            if (!emptyState && visible === 0) {
+                const container = document.getElementById('boardContent');
+                if (container && !document.getElementById('dynamicEmptyState')) {
+                    const div = document.createElement('div');
+                    div.id = 'dynamicEmptyState';
+                    div.className = 'empty-state';
+                    div.innerHTML = `
+                        <div class="display-2 mb-3">🔎</div>
+                        <h2 class="mb-2">Filtreye uygun sipariş yok</h2>
+                        <p class="subtle mb-0">Filtre veya arama terimini değiştir.</p>
+                    `;
+                    container.appendChild(div);
+                }
+            } else {
+                const dynamicEmpty = document.getElementById('dynamicEmptyState');
+                if (dynamicEmpty && visible > 0) dynamicEmpty.remove();
+            }
+
+            updateTimersAndPriorities();
+        }
+
+        function setConnectionState(state) {
+            const badge = document.getElementById('connectionBadge');
+            if (!badge) return;
+
+            badge.className = 'connection-badge';
+            if (state === 'live') {
+                badge.classList.add('connection-live');
+                badge.innerHTML = '<i class="bi bi-broadcast-pin"></i> Canlı bağlantı aktif';
+            } else if (state === 'polling') {
+                badge.classList.add('connection-polling');
+                badge.innerHTML = '<i class="bi bi-arrow-repeat"></i> Otomatik yenileme aktif';
+            } else {
+                badge.classList.add('connection-offline');
+                badge.innerHTML = '<i class="bi bi-wifi-off"></i> Bağlantı bekleniyor';
+            }
+        }
+
+        function markLastUpdate() {
+            const el = document.getElementById('lastUpdateLabel');
+            if (el) {
+                el.textContent = new Date().toLocaleTimeString('tr-TR', { hour12: false });
+            }
+        }
+
+        function getBoardSignature(doc) {
+            const board = doc.querySelector('#boardContent');
+            return board ? board.innerHTML.length + '|' + board.textContent.trim().length : String(Date.now());
+        }
+
+        function playNotification() {
+            const soundToggle = document.getElementById('soundToggle');
+            if (soundToggle && !soundToggle.checked) return;
+
+            const sound = document.getElementById('notifSound');
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(() => {});
+            }
+        }
+
+        async function refreshBoard(forceHighlight = false) {
+            try {
+                const response = await fetch(window.location.href, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    cache: 'no-store'
+                });
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                const newContent = doc.querySelector('#boardContent');
+                const current = document.querySelector('#boardContent');
+                if (!newContent || !current) return;
+
+                const newSignature = getBoardSignature(doc);
+                const changed = lastBoardSignature !== null && newSignature !== lastBoardSignature;
+
+                current.innerHTML = newContent.innerHTML;
+                lastBoardSignature = newSignature;
+
+                if (changed || forceHighlight) {
+                    document.querySelectorAll('.group-card').forEach(card => card.classList.add('fade-highlight'));
+                }
+
+                if (changed) playNotification();
+
+                attachUiEvents();
+                updateTimersAndPriorities();
+                applyFilters();
+                markLastUpdate();
+            } catch (err) {
+                console.error('Mutfak ekranı yenileme hatası:', err);
+                setConnectionState('offline');
+            }
+        }
+
+        function startPolling() {
+            if (pollingHandle) clearInterval(pollingHandle);
+            pollingHandle = setInterval(() => refreshBoard(false), 8000);
+            setConnectionState('polling');
+        }
+
+        function connectWebSocket() {
+            if (!liveUpdatesEnabled || !bolgeId) {
+                startPolling();
+                return;
+            }
+
+            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            const wsUrl = `${protocol}://${window.location.host}/ws/mutfak/${bolgeId}/`;
+
+            try {
+                socket = new WebSocket(wsUrl);
+
+                socket.onopen = function() {
+                    setConnectionState('live');
+                    if (pollingHandle) clearInterval(pollingHandle);
+                };
+
+                socket.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'refresh' || data.type === 'new_order' || data.type === 'item_ready') {
+                            refreshBoard(false);
+                        }
+                    } catch (e) {
+                        refreshBoard(false);
+                    }
+                };
+
+                socket.onerror = function() {
+                    setConnectionState('polling');
+                };
+
+                socket.onclose = function() {
+                    startPolling();
+                    setTimeout(connectWebSocket, 5000);
+                };
+            } catch (err) {
+                console.error('WebSocket başlatılamadı:', err);
+                startPolling();
+            }
+        }
+
+        function attachUiEvents() {
+            document.querySelectorAll('.btn-filter').forEach(btn => {
+                btn.onclick = function() {
+                    document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    applyFilters();
+                };
+            });
+
+            const search = document.getElementById('searchInput');
+            if (search) {
+                search.oninput = applyFilters;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            const signatureDoc = new DOMParser().parseFromString(document.documentElement.outerHTML, 'text/html');
+            lastBoardSignature = getBoardSignature(signatureDoc);
+
+            attachUiEvents();
+            updateTimersAndPriorities();
+            applyFilters();
+            markLastUpdate();
+            if (liveUpdatesEnabled) {
+                connectWebSocket();
+            } else {
+                startPolling();
+            }
+
+            document.body.addEventListener('click', function warmAudio() {
+                const sound = document.getElementById('notifSound');
+                if (sound) {
+                    sound.muted = true;
+                    sound.play()
+                        .then(() => {
+                            sound.pause();
+                            sound.currentTime = 0;
+                            sound.muted = false;
+                        })
+                        .catch(() => {});
+                }
+            }, { once: true });
+        });
+    </script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

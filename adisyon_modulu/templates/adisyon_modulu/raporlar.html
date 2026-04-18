@@ -1,0 +1,646 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>Premium Raporlar - ELAKI</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+    <style>
+        :root {
+            --elaki-navy: #0E2A47;
+            --elaki-teal: #1DA1A1;
+            --elaki-bg: #f3f7f9;
+        }
+
+        body {
+            background: linear-gradient(180deg, #eef5f7 0%, #f9fbfc 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #102a43;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, var(--elaki-navy) 0%, var(--elaki-teal) 100%);
+            color: white;
+            padding: 34px 0 70px;
+            border-radius: 0 0 36px 36px;
+            box-shadow: 0 16px 40px rgba(14,42,71,0.14);
+            margin-bottom: 22px;
+        }
+
+        .filter-card,
+        .stat-card,
+        .detail-card,
+        .premium-card,
+        .insight-card {
+            background: white;
+            border: 1px solid #e3ebef;
+            border-radius: 22px;
+            box-shadow: 0 10px 24px rgba(15,23,42,0.05);
+        }
+
+        .filter-card {
+            margin-top: -48px;
+        }
+
+        .btn-elaki {
+            background: var(--elaki-teal);
+            color: white;
+            border: none;
+        }
+
+        .btn-elaki:hover {
+            background: #168b8b;
+            color: white;
+        }
+
+        .export-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .stat-card {
+            height: 100%;
+            padding: 18px;
+        }
+
+        .stat-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+        }
+
+        .stat-value {
+            font-size: 1.55rem;
+            font-weight: 800;
+            color: var(--elaki-navy);
+            margin-top: 8px;
+        }
+
+        .section-title {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+        }
+
+        .premium-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .premium-card {
+            padding: 20px;
+            background: linear-gradient(145deg, #ffffff, #f3fbfb);
+        }
+
+        .premium-label {
+            font-size: 0.74rem;
+            color: #64748b;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .premium-value {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--elaki-navy);
+            margin: 10px 0 6px;
+        }
+
+        .premium-note {
+            color: #475569;
+            font-size: 0.88rem;
+            margin-bottom: 0;
+        }
+
+        .insight-card {
+            padding: 18px 20px;
+            height: 100%;
+            background: linear-gradient(180deg, #ffffff, #f8fbfc);
+        }
+
+        .insight-title {
+            font-weight: 800;
+            margin-bottom: 6px;
+            color: var(--elaki-navy);
+        }
+
+        .detail-card .card-header {
+            background: transparent;
+            border-bottom: 1px solid #edf2f7;
+            padding: 18px 22px;
+            font-weight: 800;
+            color: var(--elaki-navy);
+        }
+
+        .stacked-report-column {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .stacked-report-column .detail-card {
+            margin-bottom: 0 !important;
+        }
+
+        .stacked-report-column .detail-card.flex-fill {
+            min-height: 0;
+        }
+
+        .table thead th {
+            white-space: nowrap;
+            font-size: 0.85rem;
+        }
+
+        .progress {
+            height: 14px;
+            border-radius: 999px;
+            background-color: #e7eef2;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--elaki-teal), #0ea5a5);
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-section no-print">
+        <div class="container">
+            <!-- Üst Menü -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                <a href="{% url 'ana_sayfa' %}" class="text-white text-decoration-none fw-bold fs-5">
+                    <i class="bi bi-shop"></i> Elaki Yönetim Sistemleri
+                </a>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <a href="{% url 'yonetim_paneli' %}" class="btn btn-outline-light btn-sm rounded-pill px-3 py-2">
+                        <i class="bi bi-grid me-1"></i> Yönetim Paneli
+                    </a>
+                    <a href="{% url 'ana_sayfa' %}" class="btn btn-outline-light btn-sm rounded-pill px-3 py-2">
+                        <i class="bi bi-house me-1"></i> Ana Ekran
+                    </a>
+                    <span class="text-white mx-2 small">
+                        <i class="bi bi-person-circle"></i> {{ user.username }}
+                    </span>
+                    <form action="{% url 'logout' %}" method="post" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-light btn-sm rounded-pill px-3 py-2">
+                            <i class="bi bi-box-arrow-right"></i> Çıkış
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h1 class="fw-bold mb-1"><i class="bi bi-bar-chart-line-fill me-2"></i>Premium Rapor Merkezi</h1>
+                    <p class="mb-0 opacity-75">Excel ve PDF ciktilariyla finans, operasyon, kategori ve personel analizleri tek ekranda.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="filter-card p-4 mb-4 no-print">
+            <form method="get" class="row g-3 align-items-end" id="report-filter-form">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Sube</label>
+                    <select name="sube" class="form-select rounded-pill" id="filter-sube">
+                        <option value="">Tum Subeler</option>
+                        {% for sube in subeler %}
+                        <option value="{{ sube.id }}" {% if secili_sube and secili_sube.id == sube.id %}selected{% endif %}>{{ sube.ad }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Baslangic</label>
+                    <input type="date" name="baslangic" id="filter-baslangic" class="form-control rounded-pill" value="{{ baslangic }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold">Bitis</label>
+                    <input type="date" name="bitis" id="filter-bitis" class="form-control rounded-pill" value="{{ bitis }}">
+                </div>
+                <div class="col-md-5 text-md-end">
+                    <button type="submit" class="btn btn-elaki rounded-pill px-4 py-2 me-2"><i class="bi bi-search"></i> Sorgula</button>
+                    <a href="?{% if secili_sube %}sube={{ secili_sube.id }}&{% endif %}{% if baslangic %}baslangic={{ baslangic }}&{% endif %}{% if bitis %}bitis={{ bitis }}&{% endif %}excel=1" id="excel-export-link" class="btn btn-success rounded-pill px-4 py-2 me-2 export-link"><i class="bi bi-file-earmark-excel"></i><span class="ms-2">Excel</span></a>
+                    <a href="?{% if secili_sube %}sube={{ secili_sube.id }}&{% endif %}{% if baslangic %}baslangic={{ baslangic }}&{% endif %}{% if bitis %}bitis={{ bitis }}&{% endif %}pdf=1" id="pdf-export-link" class="btn btn-danger rounded-pill px-4 py-2 export-link"><i class="bi bi-file-earmark-pdf"></i><span class="ms-2">PDF</span></a>
+                </div>
+            </form>
+        </div>
+
+        <div class="section-title">Premium Ozet</div>
+        <div class="premium-grid mb-4">
+            {% for item in premium_cards %}
+            <div class="premium-card">
+                <div class="premium-label">{{ item.label }}</div>
+                <div class="premium-value">{{ item.value }}</div>
+                <p class="premium-note">{{ item.note }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if premium_insights %}
+        <div class="section-title">Yonetici Icgoruleri</div>
+        <div class="row g-3 mb-4">
+            {% for insight in premium_insights %}
+            <div class="col-md-6 col-xl-4">
+                <div class="insight-card">
+                    <div class="insight-title">{{ insight.title }}</div>
+                    <div class="text-secondary">{{ insight.detail }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-2">
+                <div class="stat-card border-start border-4 border-info">
+                    <div class="stat-label">Toplam Ciro</div>
+                    <div class="stat-value">{{ gunluk_toplam }} TL</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="stat-card border-start border-4 border-success">
+                    <div class="stat-label">Nakit</div>
+                    <div class="stat-value text-success">{{ nakit_toplam }} TL</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="stat-card border-start border-4 border-primary">
+                    <div class="stat-label">Kart</div>
+                    <div class="stat-value text-primary">{{ kart_toplam }} TL</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="stat-card border-start border-4 border-warning">
+                    <div class="stat-label">Ikram</div>
+                    <div class="stat-value text-warning">{{ ikram_toplam }} TL</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="stat-card border-start border-4 border-danger">
+                    <div class="stat-label">Iptal</div>
+                    <div class="stat-value text-danger">{{ iptal_toplam|tl_format }} TL</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="stat-card border-start border-4 border-dark">
+                    <div class="stat-label">Net Kar</div>
+                    <div class="stat-value">{{ net_kar }} TL</div>
+                </div>
+            </div>
+        </div>
+
+        {% if sube_ozetleri and not secili_sube %}
+        <div class="detail-card mb-4">
+            <div class="card-header"><i class="bi bi-shop me-2"></i>Sube Performans Karsilastirmasi</div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Sube</th>
+                            <th class="text-end">Adisyon</th>
+                            <th class="text-end">Nakit</th>
+                            <th class="text-end">Kart</th>
+                            <th class="text-end">Ciro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sube in sube_ozetleri %}
+                        <tr>
+                            <td class="ps-4 fw-bold">{{ sube.ad }}</td>
+                            <td class="text-end">{{ sube.adisyon_sayisi }}</td>
+                            <td class="text-end text-success">{{ sube.nakit|tl_format }} TL</td>
+                            <td class="text-end text-primary">{{ sube.kart|tl_format }} TL</td>
+                            <td class="text-end fw-bold">{{ sube.ciro|tl_format }} TL</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-7">
+                <div class="detail-card h-100">
+                    <div class="card-header"><i class="bi bi-box-seam me-2"></i>Urun Performansi</div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Urun</th>
+                                    <th class="text-center">Adet</th>
+                                    <th class="text-end pe-4">Ciro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for urun in en_cok_satanlar %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">{{ urun.urun__ad }}</td>
+                                    <td class="text-center">{{ urun.adet_toplam }}</td>
+                                    <td class="text-end pe-4 fw-bold text-success">{{ urun.kazanc_toplam|tl_format }} TL</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center py-4 text-muted">Satis verisi bulunamadi.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 stacked-report-column">
+                <div class="detail-card">
+                    <div class="card-header"><i class="bi bi-credit-card me-2"></i>Odeme Dagilimi</div>
+                    <div class="p-4">
+                        <div class="d-flex justify-content-between mb-2"><span>Nakit</span><strong class="text-success">%{{ nakit_oran }}</strong></div>
+                        <div class="progress mb-3"><div class="progress-bar bg-success" style="width: {{ nakit_oran }}%"></div></div>
+                        <div class="d-flex justify-content-between mb-2"><span>Kart</span><strong class="text-primary">%{{ kart_oran }}</strong></div>
+                        <div class="progress"><div class="progress-bar bg-primary" style="width: {{ kart_oran }}%"></div></div>
+                    </div>
+                </div>
+                <div class="detail-card flex-fill">
+                    <div class="card-header"><i class="bi bi-tags me-2"></i>Kategori Performansi</div>
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Kategori</th>
+                                    <th class="text-center">Adet</th>
+                                    <th class="text-end pe-3">Ciro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for kategori in kategori_raporu %}
+                                <tr>
+                                    <td class="ps-3 fw-bold">{{ kategori.kategori }}</td>
+                                    <td class="text-center">{{ kategori.adet_toplam }}</td>
+                                    <td class="text-end pe-3 text-success fw-bold">{{ kategori.ciro_toplam|tl_format }} TL</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center py-4 text-muted">Kategori verisi bulunamadi.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="detail-card h-100">
+                    <div class="card-header"><i class="bi bi-people-fill me-2"></i>Personel Performansi</div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Personel</th>
+                                    <th class="text-center">Hesap</th>
+                                    <th class="text-center">Iptal</th>
+                                    <th class="text-end pe-3">Ciro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in garson_raporu %}
+                                <tr>
+                                    <td class="ps-3 fw-bold">{{ p.isim }}</td>
+                                    <td class="text-center">{{ p.adisyon_sayisi }}</td>
+                                    <td class="text-center">{{ p.iptal_sayisi }}</td>
+                                    <td class="text-end pe-3 fw-bold text-success">{{ p.ciro|tl_format }} TL</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center py-4 text-muted">Personel verisi bulunamadi.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="detail-card h-100">
+                    <div class="card-header"><i class="bi bi-stopwatch me-2"></i>Mutfak Performansi</div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Urun</th>
+                                    <th class="text-center">Hazirlanan</th>
+                                    <th class="text-end pe-3">Ort. Sure</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in hazirlanma_raporu %}
+                                <tr>
+                                    <td class="ps-3 fw-bold">{{ item.urun__ad }}</td>
+                                    <td class="text-center">{{ item.hazirlanan_adet }}</td>
+                                    <td class="text-end pe-3">{{ item.ortalama_sure_dk }} dk</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center py-4 text-muted">Hazirlanma suresi verisi henuz yok.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-5">
+                <div class="detail-card h-100">
+                    <div class="card-header"><i class="bi bi-clock-history me-2"></i>Saatlik Yogunluk</div>
+                    <div class="p-4">
+                        {% for saat, tutar in saatlik_veriler %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small fw-bold mb-1">
+                                <span>{{ saat }}:00</span>
+                                <span>{{ tutar|tl_format }} TL</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" style="width: {% if gunluk_toplam_raw %}{% widthratio tutar gunluk_toplam_raw 100 %}{% else %}0{% endif %}%"></div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-center text-muted mb-0">Saatlik veri bulunamadi.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="detail-card h-100">
+                    <div class="card-header"><i class="bi bi-calendar3 me-2"></i>Gunluk Kirilim</div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Gun</th>
+                                    <th class="text-center">Adisyon</th>
+                                    <th class="text-end pe-3">Ciro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in gunluk_kirilim %}
+                                <tr>
+                                    <td class="ps-3 fw-bold">{{ item.gun|date:"d.m.Y" }}</td>
+                                    <td class="text-center">{{ item.adisyon_sayisi }}</td>
+                                    <td class="text-end pe-3 text-success fw-bold">{{ item.ciro|tl_format }} TL</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center py-4 text-muted">Gunluk kirilim yok.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="detail-card h-100">
+                    <div class="card-header"><i class="bi bi-gift me-2"></i>Ikramlar</div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Urun</th>
+                                    <th class="text-center">Adet</th>
+                                    <th class="text-end pe-3">Deger</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in ikram_listesi %}
+                                <tr>
+                                    <td class="ps-3 fw-bold">{{ item.urun__ad }}</td>
+                                    <td class="text-center">{{ item.adet_toplam }}</td>
+                                    <td class="text-end pe-3 text-warning fw-bold">{{ item.deger_toplam|tl_format }} TL</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center py-4 text-muted">Ikram kaydi bulunamadi.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="detail-card h-100">
+                    <div class="card-header"><i class="bi bi-cash-stack me-2"></i>Giderler</div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Tarih</th>
+                                    <th>Kategori</th>
+                                    <th>Sorumlu</th>
+                                    <th class="text-end pe-3">Tutar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for gider in gider_listesi %}
+                                <tr>
+                                    <td class="ps-3">{{ gider.tarih|date:"d.m.Y" }}</td>
+                                    <td>{{ gider.kategori }}</td>
+                                    <td>{{ gider.sorumlu|default:"-" }}</td>
+                                    <td class="text-end pe-3 text-danger fw-bold">{{ gider.tutar|tl_format }} TL</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center py-4 text-muted">Gider kaydi bulunamadi.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-card mb-4">
+            <div class="card-header"><i class="bi bi-exclamation-triangle me-2"></i>Iptal ve Iade Kayitlari</div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Zaman</th>
+                            <th>Sube</th>
+                            <th>Urun</th>
+                            <th>Personel</th>
+                            <th>Sebep</th>
+                            <th class="text-end pe-3">Tutar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in iptal_kayitlari %}
+                        <tr>
+                            <td class="ps-3 small">{{ log.zaman|date:"d.m.Y H:i" }}</td>
+                            <td>{{ log.sube.ad }}</td>
+                            <td class="fw-bold">{{ log.urun_adi }}</td>
+                            <td>{{ log.garson.username|default:"-" }}</td>
+                            <td class="small text-muted">{{ log.sebep|default:"-" }}</td>
+                            <td class="text-end pe-3 text-danger fw-bold">{{ log.tutar|tl_format }} TL</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center py-4 text-muted">Iptal kaydi bulunamadi.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="alert alert-light text-center small text-muted mb-0">
+            Rapor araligi: {{ baslangic }} - {{ bitis }} | Toplam {{ adisyon_sayisi }} kapanan hesap incelendi.
+        </div>
+    </div>
+
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script>
+        (function () {
+            const baseUrl = window.location.pathname;
+            const subeInput = document.getElementById('filter-sube');
+            const baslangicInput = document.getElementById('filter-baslangic');
+            const bitisInput = document.getElementById('filter-bitis');
+            const excelLink = document.getElementById('excel-export-link');
+            const pdfLink = document.getElementById('pdf-export-link');
+
+            function buildExportUrl(type) {
+                const params = new URLSearchParams();
+                if (subeInput.value) params.set('sube', subeInput.value);
+                if (baslangicInput.value) params.set('baslangic', baslangicInput.value);
+                if (bitisInput.value) params.set('bitis', bitisInput.value);
+                params.set(type, '1');
+                return `${baseUrl}?${params.toString()}`;
+            }
+
+            function refreshExportLinks() {
+                excelLink.href = buildExportUrl('excel');
+                pdfLink.href = buildExportUrl('pdf');
+            }
+
+            [subeInput, baslangicInput, bitisInput].forEach(element => {
+                element.addEventListener('change', refreshExportLinks);
+                element.addEventListener('input', refreshExportLinks);
+            });
+
+            refreshExportLinks();
+        })();
+    </script>
+</body>
+</html>

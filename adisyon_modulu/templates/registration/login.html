@@ -1,0 +1,402 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>ELAKI - Yonetim Sistemleri Giris</title>
+
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px 0;
+        }
+
+        .login-card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            overflow: hidden;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-container {
+            padding: 40px 40px 20px 40px;
+            text-align: left;
+        }
+
+        .logo-img {
+            max-width: 250px;
+            height: auto;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
+        }
+
+        .btn-primary {
+            background-color: #1DA1A1;
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0E2A47;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background-color: #8ccccc;
+            opacity: 1;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none !important;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #ddd;
+        }
+
+        .form-control:focus {
+            border-color: #1DA1A1;
+            box-shadow: 0 0 0 0.25rem rgba(29, 161, 161, 0.25);
+        }
+
+        .login-footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .agreement-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .agreement-box a,
+        .info-box a {
+            color: #0E2A47;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .agreement-box a:hover,
+        .info-box a:hover {
+            color: #1DA1A1;
+            text-decoration: underline;
+        }
+
+        .small-note {
+            font-size: 0.82rem;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+
+        .info-box {
+            background: #f3fbfb;
+            border: 1px solid rgba(29, 161, 161, 0.18);
+            border-radius: 12px;
+            padding: 14px;
+            color: #245b5b;
+            font-size: 0.9rem;
+        }
+
+        .footer-logo-container {
+            position: fixed;
+            bottom: 15px;
+            right: 25px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .footer-logo-container img {
+            width: 180px;
+            opacity: 0.6;
+            filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.1));
+        }
+
+        @media print {
+            .footer-logo-container {
+                display: none !important;
+            }
+        }
+
+        .top-left-info {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            font-weight: 600;
+            z-index: 1000;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .bottom-left-info {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            text-align: left;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            z-index: 1000;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .bottom-left-info a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .bottom-left-info a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .top-left-info, .bottom-left-info {
+                position: static;
+                text-align: center;
+                padding: 10px;
+                color: rgba(255,255,255,0.9);
+            }
+            .top-left-info {
+                font-size: 1rem;
+            }
+            .bottom-left-info {
+                font-size: 0.8rem;
+            }
+            .footer-logo-container {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-left-info d-none d-md-block">
+        Elaki Yönetim Sistemleri
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card login-card">
+
+                    <div class="logo-container">
+                        <img src="{% static 'elaki-logo.png' %}" alt="ELAKI Logo" class="logo-img">
+                    </div>
+
+                    <div class="card-body px-4 pb-4">
+                        <form method="post" id="loginForm">
+                            {% csrf_token %}
+
+                            {% if form.errors %}
+                                <div class="alert alert-danger rounded-3" role="alert">
+                                    Kullanici adi veya sifre hatali.
+                                </div>
+                            {% endif %}
+
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-warning rounded-3" role="alert">
+                                    {% for error in form.non_field_errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert alert-warning rounded-3" role="alert">
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">KULLANICI ADI</label>
+                                <input
+                                    type="text"
+                                    id="usernameInput"
+                                    name="username"
+                                    class="form-control"
+                                    placeholder="Kullanici adinizi girin"
+                                    value="{{ request.POST.username|default:'' }}"
+                                    required
+                                >
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">SIFRE</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    class="form-control"
+                                    placeholder="********"
+                                    required
+                                >
+                            </div>
+
+                            <div id="kvkkAgreementBox" class="agreement-box mb-3{% if not kvkk_onay_gerekli %} d-none{% endif %}">
+                                <div class="form-check mb-2">
+                                    <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        name="kvkk_onay"
+                                        value="1"
+                                        id="kvkkOnay"
+                                        required
+                                    >
+                                    <label class="form-check-label small" for="kvkkOnay">
+                                        <strong>KVKK Aydinlatma Metni</strong>,
+                                        <strong>Yazilim Lisans Sozlesmesi</strong>,
+                                        <strong>Kullanim Sartlari</strong> ve
+                                        <strong>Fikri Mulkiyet Haklari</strong> metinlerini okudum,
+                                        anladim ve kabul ediyorum.
+                                    </label>
+                                </div>
+
+                                <div class="small-note">
+                                    Resmi dokumani goruntulemek icin
+                                    <a href="{% static kvkk_link %}" target="_blank">
+                                        buraya tiklayin <i class="bi bi-box-arrow-up-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div id="kvkkInfoBox" class="info-box mb-3{% if kvkk_onay_gerekli %} d-none{% endif %}">
+                                KVKK ve lisans onayiniz daha once kaydedildi. Metne tekrar ulasmak isterseniz
+                                <a href="{% static kvkk_link %}" target="_blank">buraya tiklayin</a>.
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" id="loginButton" class="btn btn-primary shadow" {% if kvkk_onay_gerekli %}disabled{% endif %}>
+                                    SISTEME GIRIS YAP
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="login-footer border-top bg-light">
+                        &copy; 2026 ELAKI Yonetim Sistemleri <br>
+                        <span class="text-muted">info@elaki.net</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-left-info d-none d-md-block">
+        <a href="mailto:info@elaki.net">info@elaki.net</a><br>
+        <a href="https://www.elaki.net" target="_blank">www.elaki.net</a><br>
+        0 534 293 53 18
+    </div>
+
+    <div class="footer-logo-container">
+        <img src="{% static 'elaki-logo.png' %}" alt="ELAKI Logo" style="margin-bottom: 80px; opacity: 0.35;">
+    </div>
+
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const usernameInput = document.getElementById("usernameInput");
+            const kvkkOnay = document.getElementById("kvkkOnay");
+            const loginButton = document.getElementById("loginButton");
+            const loginForm = document.getElementById("loginForm");
+            const kvkkAgreementBox = document.getElementById("kvkkAgreementBox");
+            const kvkkInfoBox = document.getElementById("kvkkInfoBox");
+            let kvkkOnayGerekli = {{ kvkk_onay_gerekli|yesno:"true,false" }};
+
+            function setKvkkState(gerekli) {
+                kvkkOnayGerekli = gerekli;
+                if (kvkkAgreementBox) {
+                    kvkkAgreementBox.classList.toggle("d-none", !gerekli);
+                }
+                if (kvkkInfoBox) {
+                    kvkkInfoBox.classList.toggle("d-none", gerekli);
+                }
+                if (kvkkOnay) {
+                    kvkkOnay.required = gerekli;
+                    if (!gerekli) {
+                        kvkkOnay.checked = true;
+                    }
+                }
+                kontrolEt();
+            }
+
+            function kontrolEt() {
+                if (!kvkkOnayGerekli) {
+                    loginButton.disabled = false;
+                    return;
+                }
+                loginButton.disabled = !kvkkOnay || !kvkkOnay.checked;
+            }
+
+            if (kvkkOnay) {
+                kvkkOnay.addEventListener("change", kontrolEt);
+            }
+
+            let lookupTimer = null;
+
+            function kvkkLookup(username) {
+                if (!username) {
+                    setKvkkState(true);
+                    return;
+                }
+
+                fetch(`/accounts/kvkk-durum/?username=${encodeURIComponent(username)}`, {
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                    cache: "no-store"
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        setKvkkState(Boolean(data.kvkk_onay_gerekli));
+                    })
+                    .catch(() => {
+                        setKvkkState(true);
+                    });
+            }
+
+            if (usernameInput) {
+                const scheduleLookup = function () {
+                    const username = usernameInput.value.trim();
+                    window.clearTimeout(lookupTimer);
+                    lookupTimer = window.setTimeout(function () {
+                        kvkkLookup(username);
+                    }, 250);
+                };
+
+                usernameInput.addEventListener("input", scheduleLookup);
+                usernameInput.addEventListener("change", scheduleLookup);
+                usernameInput.addEventListener("blur", scheduleLookup);
+
+                window.setTimeout(scheduleLookup, 50);
+                window.setTimeout(scheduleLookup, 500);
+            }
+
+            kontrolEt();
+
+            loginForm.addEventListener("submit", function (e) {
+                if (kvkkOnayGerekli && (!kvkkOnay || !kvkkOnay.checked)) {
+                    e.preventDefault();
+                    alert("Devam etmeden once KVKK ve lisans metnini kabul etmelisiniz.");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

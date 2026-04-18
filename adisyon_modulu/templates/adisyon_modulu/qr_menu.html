@@ -1,0 +1,558 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>{{ sube.ad }} Menu</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+    <style>
+        :root {
+            --elaki-navy: #0E2A47;
+            --elaki-teal: #1DA1A1;
+            --elaki-cream: #f4f7f8;
+            --elaki-card: #ffffff;
+            --elaki-ink: #163047;
+            --elaki-muted: #617385;
+            --elaki-line: rgba(14, 42, 71, 0.10);
+            --elaki-soft-teal: rgba(29, 161, 161, 0.10);
+            --elaki-success: #1f8b5f;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            color: var(--elaki-ink);
+            background:
+                radial-gradient(circle at top left, rgba(29, 161, 161, 0.12), transparent 24%),
+                radial-gradient(circle at top right, rgba(14, 42, 71, 0.10), transparent 18%),
+                linear-gradient(180deg, #f7fbfb 0%, var(--elaki-cream) 100%);
+            padding-bottom: 130px;
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: 32px 18px 26px;
+            color: #fff;
+            background: linear-gradient(135deg, var(--elaki-navy) 0%, #13476f 55%, var(--elaki-teal) 100%);
+            border-radius: 0 0 28px 28px;
+            box-shadow: 0 18px 38px rgba(14, 42, 71, 0.18);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            right: -50px;
+            top: -40px;
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .hero-logo {
+            width: 140px;
+            height: auto;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 1.95rem;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero p {
+            margin: 10px 0 0;
+            color: rgba(255, 255, 255, 0.84);
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-meta {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+
+        .category-nav {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 12px 14px;
+            background: rgba(244, 247, 248, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--elaki-line);
+        }
+
+        .category-nav a {
+            text-decoration: none;
+            color: var(--elaki-navy);
+            font-weight: 700;
+            white-space: nowrap;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(29, 161, 161, 0.12);
+            border-radius: 999px;
+            box-shadow: 0 8px 18px rgba(14, 42, 71, 0.05);
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 16px 24px;
+        }
+
+        .category-title {
+            margin: 30px 0 14px;
+            color: var(--elaki-navy);
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+
+        .menu-item {
+            display: grid;
+            grid-template-columns: 92px 1fr auto;
+            gap: 14px;
+            align-items: center;
+            background: linear-gradient(145deg, #ffffff 0%, #f9fcfc 100%);
+            border: 1px solid rgba(14, 42, 71, 0.08);
+            border-radius: 24px;
+            padding: 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 14px 28px rgba(14, 42, 71, 0.06);
+        }
+
+        .menu-item img,
+        .menu-item .image-fallback {
+            width: 92px;
+            height: 92px;
+            border-radius: 20px;
+            object-fit: cover;
+            background: linear-gradient(145deg, rgba(29, 161, 161, 0.12), rgba(14, 42, 71, 0.08));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--elaki-navy);
+            font-size: 1.2rem;
+        }
+
+        .item-name {
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--elaki-navy);
+        }
+
+        .item-desc {
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: var(--elaki-muted);
+            line-height: 1.45;
+        }
+
+        .item-price {
+            display: inline-flex;
+            margin-top: 10px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: var(--elaki-soft-teal);
+            color: var(--elaki-teal);
+            font-weight: 800;
+        }
+
+        .item-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 98px;
+        }
+
+        .qty-control {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 14px;
+            background: #fff;
+            border: 1px solid var(--elaki-line);
+        }
+
+        .qty-control button,
+        .add-btn,
+        .cart-submit,
+        .service-btn {
+            border: none;
+            cursor: pointer;
+        }
+
+        .qty-control button {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(14, 42, 71, 0.08);
+            color: var(--elaki-navy);
+            font-weight: 800;
+        }
+
+        .add-btn {
+            padding: 11px 12px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--elaki-navy) 0%, var(--elaki-teal) 100%);
+            color: white;
+            font-weight: 800;
+            box-shadow: 0 12px 22px rgba(14, 42, 71, 0.14);
+        }
+
+        .note-input,
+        .global-note {
+            width: 100%;
+            border: 1px solid var(--elaki-line);
+            border-radius: 14px;
+            padding: 10px 12px;
+            margin-top: 10px;
+            font: inherit;
+            resize: vertical;
+            color: var(--elaki-ink);
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        .floating-actions {
+            position: fixed;
+            left: 50%;
+            bottom: 18px;
+            transform: translateX(-50%);
+            width: min(94vw, 780px);
+            display: grid;
+            grid-template-columns: 1fr 72px;
+            gap: 10px;
+            z-index: 30;
+        }
+
+        .cart-bar,
+        .service-btn {
+            box-shadow: 0 16px 36px rgba(14, 42, 71, 0.18);
+        }
+
+        .cart-bar {
+            background: linear-gradient(135deg, var(--elaki-navy) 0%, #123b5d 55%, var(--elaki-teal) 100%);
+            color: white;
+            border-radius: 24px;
+            padding: 15px 16px;
+        }
+
+        .cart-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .cart-items {
+            max-height: 210px;
+            overflow-y: auto;
+            font-size: 0.92rem;
+        }
+
+        .cart-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 9px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .cart-empty {
+            opacity: 0.8;
+            padding: 10px 0 4px;
+        }
+
+        .cart-submit {
+            width: 100%;
+            margin-top: 12px;
+            border-radius: 16px;
+            padding: 13px 14px;
+            background: linear-gradient(135deg, #24a36f 0%, var(--elaki-success) 100%);
+            color: white;
+            font-weight: 800;
+        }
+
+        .service-btn {
+            border-radius: 24px;
+            background: #fff;
+            color: var(--elaki-navy);
+            font-size: 1.28rem;
+        }
+
+        @media (max-width: 640px) {
+            .menu-item {
+                grid-template-columns: 78px 1fr;
+            }
+
+            .menu-item img,
+            .menu-item .image-fallback {
+                width: 78px;
+                height: 78px;
+            }
+
+            .item-actions {
+                grid-column: 1 / -1;
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <img src="/static/elaki-logo.png" alt="ELAKİ Logo" class="hero-logo">
+        <h1>{{ sube.ad }}</h1>
+        <p>QR menu uzerinden siparis verin, isterseniz tek dokunusla garson cagirin.</p>
+        <div class="hero-meta">
+            <div class="hero-badge">
+                <i class="bi bi-qr-code-scan"></i>
+                QR menu aktif
+            </div>
+            <div class="hero-badge">
+                <i class="bi bi-pin-map-fill"></i>
+                Masa {{ masa_no|default:"?" }}
+            </div>
+        </div>
+    </div>
+
+    <div class="category-nav">
+        {% for kategori in kategoriler %}
+            {% if kategori.urunler.all %}
+                <a href="#kategori-{{ kategori.id }}">{{ kategori.ad }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="container">
+        {% for kategori in kategoriler %}
+            {% if kategori.urunler.all %}
+                <h2 class="category-title" id="kategori-{{ kategori.id }}">{{ kategori.ad }}</h2>
+                {% for urun in kategori.urunler.all %}
+                    <div class="menu-item">
+                        {% if urun.gorsel %}
+                            <img src="{{ urun.gorsel.url }}" alt="{{ urun.ad }}">
+                        {% else %}
+                            <div class="image-fallback"><i class="bi bi-cup-hot-fill"></i></div>
+                        {% endif %}
+                        <div>
+                            <div class="item-name">{{ urun.ad }}</div>
+                            {% if urun.aciklama %}
+                                <div class="item-desc">{{ urun.aciklama }}</div>
+                            {% endif %}
+                            <div class="item-price">{{ urun.fiyat }} TL</div>
+                            <textarea class="note-input" rows="2" placeholder="Ozel not (ornek: sogansiz, acisiz)" data-note-for="{{ urun.id }}"></textarea>
+                        </div>
+                        <div class="item-actions">
+                            <div class="qty-control">
+                                <button type="button" onclick="changeQty({{ urun.id }}, -1)">-</button>
+                                <span id="qty-{{ urun.id }}">1</span>
+                                <button type="button" onclick="changeQty({{ urun.id }}, 1)">+</button>
+                            </div>
+                            <button type="button" class="add-btn" onclick="addToCart({{ urun.id }}, '{{ urun.ad|escapejs }}', '{{ urun.fiyat }}')">Sepete Ekle</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="floating-actions">
+        <div class="cart-bar">
+            <div class="cart-top">
+                <strong><i class="bi bi-basket2-fill"></i> Siparis Sepeti</strong>
+                <span id="cart-total">0.00 TL</span>
+            </div>
+            <div id="cart-items" class="cart-items">
+                <div class="cart-empty">Sepet bos. Urun eklediginizde siparis talebi olusacak.</div>
+            </div>
+            <textarea id="global-note" class="global-note" rows="2" placeholder="Masa icin genel not"></textarea>
+            <button id="submit-order-btn" type="button" class="cart-submit" onclick="submitOrder()">Siparisi Gonder ve Onaya Al</button>
+        </div>
+        <button type="button" class="service-btn" onclick="garsonCagir()" title="Garson Cagir">
+            <i class="bi bi-bell-fill"></i>
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const quantities = {};
+        const cart = [];
+        const masaNo = "{{ masa_no|escapejs }}";
+        const subeId = "{{ sube.id }}";
+
+        function changeQty(urunId, delta) {
+            const current = quantities[urunId] || 1;
+            const next = Math.max(1, current + delta);
+            quantities[urunId] = next;
+            document.getElementById(`qty-${urunId}`).textContent = next;
+        }
+
+        function addToCart(urunId, urunAdi, fiyat) {
+            const adet = quantities[urunId] || 1;
+            const noteEl = document.querySelector(`[data-note-for="${urunId}"]`);
+            const ozelIstek = noteEl ? noteEl.value.trim() : "";
+            const existing = cart.find(item => item.urun_id === urunId && item.ozel_istek === ozelIstek);
+
+            if (existing) {
+                existing.adet += adet;
+            } else {
+                cart.push({
+                    urun_id: urunId,
+                    urun: urunAdi,
+                    fiyat: parseFloat(String(fiyat).replace(',', '.')),
+                    adet: adet,
+                    ozel_istek: ozelIstek
+                });
+            }
+
+            quantities[urunId] = 1;
+            document.getElementById(`qty-${urunId}`).textContent = "1";
+            if (noteEl) noteEl.value = "";
+            renderCart();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCart();
+        }
+
+        function renderCart() {
+            const cartItems = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+
+            if (!cart.length) {
+                cartItems.innerHTML = '<div class="cart-empty">Sepet bos. Urun eklediginizde siparis talebi olusacak.</div>';
+                cartTotal.textContent = '0.00 TL';
+                return;
+            }
+
+            let total = 0;
+            cartItems.innerHTML = cart.map((item, index) => {
+                total += item.fiyat * item.adet;
+                return `
+                    <div class="cart-row">
+                        <div>
+                            <strong>${item.urun}</strong><br>
+                            <span>${item.adet} x ${item.fiyat.toFixed(2)} TL</span>
+                            ${item.ozel_istek ? `<br><small>Not: ${item.ozel_istek}</small>` : ''}
+                        </div>
+                        <button type="button" onclick="removeFromCart(${index})" style="background:none;border:none;color:#ffe3e3;font-size:1rem;cursor:pointer;">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            cartTotal.textContent = total.toFixed(2) + ' TL';
+        }
+
+        async function submitOrder() {
+            if (!masaNo) {
+                Swal.fire({ title: 'Hata', text: 'Masa bilgisi bulunamadi.', icon: 'error' });
+                return;
+            }
+            if (!cart.length) {
+                Swal.fire({ title: 'Sepet Bos', text: 'Siparis gondermek icin once urun ekleyin.', icon: 'warning' });
+                return;
+            }
+
+            const btn = document.getElementById('submit-order-btn');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/menu-siparis/${subeId}/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        masa: masaNo,
+                        musteri_notu: document.getElementById('global-note').value.trim(),
+                        items: cart
+                    })
+                });
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Siparis gonderilemedi.');
+                }
+
+                cart.length = 0;
+                document.getElementById('global-note').value = '';
+                renderCart();
+                Swal.fire({ title: 'Siparis Alindi', text: data.message, icon: 'success', confirmButtonColor: '#0E2A47' });
+            } catch (error) {
+                Swal.fire({ title: 'Hata', text: error.message, icon: 'error' });
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function garsonCagir() {
+            if (!masaNo) {
+                Swal.fire({ title: 'Hata', text: 'QR kodda masa bilgisi eksik.', icon: 'error' });
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: 'Garson Cagir',
+                text: `Masa ${masaNo} icin garson cagirilacak. Onayliyor musunuz?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Evet',
+                cancelButtonText: 'Iptal',
+                confirmButtonColor: '#0E2A47'
+            });
+            if (!result.isConfirmed) return;
+
+            const response = await fetch(`/api/garson-cagir/${subeId}/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ masa: masaNo })
+            });
+            const data = await response.json();
+            Swal.fire({
+                title: data.success ? 'Bildirim Gonderildi' : 'Hata',
+                text: data.message || 'Islem tamamlandi.',
+                icon: data.success ? 'success' : 'error',
+                confirmButtonColor: '#0E2A47'
+            });
+        }
+    </script>
+</body>
+</html>

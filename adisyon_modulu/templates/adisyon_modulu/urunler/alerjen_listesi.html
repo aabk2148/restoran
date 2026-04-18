@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Alerjen Yönetimi</h2>
+        <a href="{% url 'alerjen_ekle' %}" class="btn btn-primary">Yeni Alerjen</a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-info">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-bordered table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Alerjen Adı</th>
+                        <th>Açıklama</th>
+                        <th>Durum</th>
+                        <th width="180">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alerjen in alerjenler %}
+                    <tr>
+                        <td>{{ alerjen.id }}</td>
+                        <td>{{ alerjen.ad }}</td>
+                        <td>{{ alerjen.aciklama|default:"-" }}</td>
+                        <td>
+                            {% if alerjen.aktif %}
+                                <span class="badge bg-success">Aktif</span>
+                            {% else %}
+                                <span class="badge bg-danger">Pasif</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'alerjen_duzenle' alerjen.id %}" class="btn btn-sm btn-warning">Düzenle</a>
+                            <a href="{% url 'alerjen_sil' alerjen.id %}" class="btn btn-sm btn-danger">Sil</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">Kayıtlı alerjen yok.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

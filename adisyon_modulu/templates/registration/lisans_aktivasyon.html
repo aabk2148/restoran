@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>ELAKİ - Lisans Aktivasyon</title>
+
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 24px 0;
+        }
+
+        .container {
+            width: 100%;
+        }
+
+        .aktivasyon-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: none;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #ddd;
+        }
+
+        .form-control:focus {
+            border-color: #1DA1A1;
+            box-shadow: 0 0 0 0.25rem rgba(29, 161, 161, 0.25);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            width: 100%;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .lisans-kodu {
+            text-transform: uppercase;
+            font-family: monospace;
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+        }
+        
+        .logo-img {
+            max-width: 250px;
+            height: auto;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
+        }
+
+        .bilgi-kutusu {
+            border: none;
+            border-radius: 14px;
+            background: rgba(29, 161, 161, 0.12);
+            color: #0E2A47;
+        }
+
+        .footer-logo-container {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .footer-logo-container img {
+            width: 140px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px 0;
+            }
+
+            .aktivasyon-card {
+                padding: 28px 22px;
+            }
+
+            .logo-img {
+                max-width: 200px;
+            }
+
+            .lisans-kodu {
+                font-size: 1rem;
+                letter-spacing: 2px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="aktivasyon-card">
+                    
+                    <div class="text-center mb-4">
+                        <img src="{% static 'elaki-logo.png' %}" alt="ELAKİ Logo" class="logo-img">
+                        <h3 class="mt-4 text-primary">RestoranMaster</h3>
+                        <p class="text-muted">Lisans Aktivasyonu</p>
+                    </div>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <div class="alert bilgi-kutusu d-flex align-items-start gap-2" role="alert">
+                        <i class="bi bi-info-circle-fill mt-1"></i>
+                        Sistemin çalışması için lisans aktivasyonu gereklidir.
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label class="form-label text-muted small fw-bold">LİSANS KODU</label>
+                            <input type="text" 
+                                   name="lisans_kodu" 
+                                   class="form-control lisans-kodu" 
+                                   placeholder="XXXXX-XXXXX-XXXXX"
+                                   maxlength="17"
+                                   autocomplete="off"
+                                   style="text-transform: uppercase"
+                                   required>
+                            <div class="form-text">
+                                Size verilen 16 haneli lisans kodunu girin.
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary shadow">
+                            LİSANSI AKTİVE ET
+                        </button>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center text-muted small">
+                        <p>Lisans kodunuz yoksa sistem yöneticinizle iletişime geçin.</p>
+                        <p class="mb-0">© 2026 ELAKİ Yönetim Sistemleri</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer-logo-container">
+        <img src="{% static 'logo.png' %}" alt="ELAKİ">
+    </div>
+    
+    
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
+

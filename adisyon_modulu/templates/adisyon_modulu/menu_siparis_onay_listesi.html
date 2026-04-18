@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Menu Siparis Onay{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1">Menu Siparis Onay</h1>
+            <div class="text-muted">QR veya menu uzerinden gelen siparis taleplerini burada kontrol edebilirsin.</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ back_url }}" class="btn btn-outline-primary rounded-pill px-4">Yonetim Paneline Don</a>
+            <a href="{% url 'ana_sayfa' %}" class="btn btn-outline-secondary rounded-pill px-4">Ana Ekran</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <h2 class="h5 mb-3">Bekleyen Talepler</h2>
+            {% for talep in bekleyen_talepler %}
+                <div class="border rounded-4 p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                        <div>
+                            <div class="fw-bold">{{ talep.sube.ad }} / Masa {{ talep.masa_no }}</div>
+                            <div class="small text-muted">{{ talep.olusturma_zamani|date:"d.m.Y H:i" }}</div>
+                            {% if talep.musteri_notu %}
+                                <div class="small mt-2"><strong>Genel Not:</strong> {{ talep.musteri_notu }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-semibold">Toplam: {{ talep.toplam_tutar }} TL</div>
+                            <div class="small text-muted">Kalem: {{ talep.kalemler.count }}</div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Urun</th>
+                                    <th>Adet</th>
+                                    <th>Not</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for kalem in talep.kalemler.all %}
+                                    <tr>
+                                        <td>{{ kalem.urun.ad }}</td>
+                                        <td>{{ kalem.adet }}</td>
+                                        <td>{{ kalem.ozel_istek|default:"-" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <form method="post" action="{% url 'menu_siparis_onayla' talep.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ back_url }}">
+                            <button type="submit" class="btn btn-success rounded-3 fw-semibold">Onayla ve Adisyona Aktar</button>
+                        </form>
+                        <form method="post" action="{% url 'menu_siparis_reddet' talep.id %}" class="d-flex gap-2 flex-wrap">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ back_url }}">
+                            <input type="text" name="red_sebebi" class="form-control" placeholder="Red sebebi" style="min-width: 220px;">
+                            <button type="submit" class="btn btn-outline-danger rounded-3 fw-semibold">Reddet</button>
+                        </form>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-muted">Bekleyen siparis talebi yok.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <h2 class="h5 mb-3">Sonuclanan Talepler</h2>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Sube / Masa</th>
+                            <th>Durum</th>
+                            <th>Onaylayan</th>
+                            <th>Adisyon</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for talep in sonuclanan_talepler %}
+                            <tr>
+                                <td>{{ talep.olusturma_zamani|date:"d.m.Y H:i" }}</td>
+                                <td>{{ talep.sube.ad }} / {{ talep.masa_no }}</td>
+                                <td>{{ talep.durum }}</td>
+                                <td>{{ talep.onaylayan.username|default:"-" }}</td>
+                                <td>{% if talep.adisyon %}#{{ talep.adisyon.id }}{% else %}-{% endif %}</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="5" class="text-center text-muted py-4">Henuz sonuclanan talep yok.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

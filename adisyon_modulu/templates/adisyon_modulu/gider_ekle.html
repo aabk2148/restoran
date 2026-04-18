@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gider Kaydı - ELAKİ</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+    <style>
+        body { background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%); min-height: 100vh; display: flex; align-items: center; }
+        .card { border-radius: 20px; border: none; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card p-4">
+                    <h3 class="text-center fw-bold mb-4" style="color: #0E2A47;">💸 GİDER KAYDI EKLE</h3>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="small fw-bold">KATEGORİ</label>
+                            <select name="kategori" class="form-select" required>
+                                {% for val, text in kategoriler %}<option value="{{ val }}">{{ text }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="small fw-bold">AÇIKLAMA</label>
+                            <input type="text" name="aciklama" class="form-control" placeholder="Örn: Aylık Mutfak Alışverişi" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="small fw-bold">İŞLEM SORUMLUSU</label>
+                            <input type="text" name="sorumlu" class="form-control" placeholder="Örn: Kaan Bey" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="small fw-bold">TUTAR (₺)</label>
+                            <input type="number" name="tutar" step="0.01" class="form-control form-control-lg fw-bold text-danger" required>
+                        </div>
+                        <button type="submit" class="btn btn-navy btn-lg w-100 shadow text-white" style="background: #0E2A47;">KAYDET</button>
+                        <a href="{% url 'rapor_sayfasi' %}" class="btn btn-link w-100 text-muted mt-2">Vazgeç</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

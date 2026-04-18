@@ -1,0 +1,684 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>{{ sube.ad }} - Masa Takibi</title>
+<link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        /* Kurumsal Renkler */
+        :root {
+            --elaki-navy: #0E2A47;
+            --elaki-teal: #1DA1A1;
+        }
+
+        /* Üst Panel */
+        .header-card {
+            background: linear-gradient(135deg, var(--elaki-navy) 0%, var(--elaki-teal) 100%);
+            color: white;
+            border-radius: 0 0 25px 25px;
+            padding: 25px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Estetik Masa İkonları */
+        .masa-item {
+            text-decoration: none !important;
+            display: block;
+            transition: box-shadow 0.3s, background-color 0.3s;
+            position: absolute;
+            touch-action: none;
+            box-sizing: border-box;
+        }
+
+        .masa-item:hover {
+            transform: translateY(-8px);
+        }
+
+        .masa-box {
+            width: 100%;
+            height: 100%;
+            border-radius: 25px; /* Yuvarlak köşeler */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border: none;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+            padding: 15px;
+            cursor: pointer;
+        }
+
+        /* Boş Masa Stili */
+        .masa-bos {
+            background: #ffffff;
+            border: 2px solid #e0e0e0;
+        }
+        .masa-bos .masa-no { color: var(--elaki-navy); }
+        .masa-bos .status-label { color: #28a745; font-weight: 600; }
+
+        /* Dolu Masa Stili */
+        .masa-dolu {
+            background: #ffffff;
+            border: 2px solid #dc3545;
+            box-shadow: 0 10px 20px rgba(220, 53, 69, 0.15);
+        }
+        .masa-dolu .masa-no { color: #dc3545; }
+        
+        /* Rezervasyonlu Masa Stili */
+        .masa-rezerve {
+            background: #ffffff;
+            border: 2px solid #ffc107;
+            box-shadow: 0 10px 20px rgba(255, 193, 7, 0.15);
+        }
+        .masa-rezerve .masa-no { color: #fd7e14; }
+        
+        /* Masa Numarası */
+        .masa-no {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0;
+        }
+
+        .masa-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.6;
+            margin-bottom: -5px;
+        }
+
+        /* Tutar Rozeti (Dolu Masalar İçin) */
+        .price-tag {
+            background-color: #dc3545;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+        }
+
+        /* Rezervasyon Rozeti */
+        .rezerve-tag {
+            background-color: #ffc107;
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            box-shadow: 0 4px 8px rgba(255, 193, 7, 0.2);
+        }
+
+        /* Paket Servis Butonu */
+        .btn-paket {
+            background: white;
+            color: var(--elaki-navy);
+            border-radius: 15px;
+            padding: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .btn-paket:hover { background: #f8f9fa; color: var(--elaki-teal); transform: scale(1.02); }
+
+        .ops-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 14px;
+        }
+
+        .ops-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f3faf9 100%);
+            border: 1px solid rgba(14,42,71,0.08);
+            border-radius: 22px;
+            padding: 18px;
+            box-shadow: 0 10px 22px rgba(0,0,0,0.05);
+        }
+
+        .ops-card-title {
+            color: var(--elaki-navy);
+            font-weight: 800;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .ops-card-desc {
+            color: #5f6f7d;
+            font-size: 0.9rem;
+            margin-bottom: 14px;
+        }
+
+        .ops-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(29,161,161,0.12);
+            color: var(--elaki-navy);
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .menu-mini-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .menu-mini-item {
+            background: #fff;
+            border: 1px solid #dbe7ec;
+            border-radius: 16px;
+            padding: 12px 14px;
+        }
+
+        .menu-mini-item strong {
+            color: var(--elaki-navy);
+        }
+
+        .menu-mini-item small {
+            color: #6b7280;
+        }
+
+        /* Logo Ayarı */
+        .footer-logo {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            width: 150px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Masa Planı Alanı */
+        #masa-plani-alani {
+            position: relative;
+            background-color: #ffffff;
+            border: 2px dashed #d1d9e6;
+            border-radius: 20px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
+            margin: auto;
+            overflow: hidden;
+        }
+
+        /* Düzenleme Modu Stilleri */
+        .edit-mode .masa-box {
+            cursor: move;
+        }
+        .edit-mode .masa-item {
+            border: 2px dashed var(--elaki-teal);
+        }
+        .edit-mode .masa-item:hover {
+            transform: none; /* Sürüklerken zıplamayı engelle */
+        }
+        .edit-controls {
+            background: #fff;
+            border-radius: 15px;
+        }
+
+        /* Kroki Alanı Düzenleme & Sil Butonu */
+        .edit-mode #masa-plani-alani {
+            border: 4px dashed var(--elaki-teal);
+            border-right: 8px solid var(--elaki-teal);
+            border-bottom: 8px solid var(--elaki-teal);
+            cursor: se-resize;
+        }
+        .delete-masa-btn {
+            position: absolute; top: -10px; right: -10px; z-index: 10;
+            border-radius: 50%; width: 30px; height: 30px;
+            display: none; align-items: center; justify-content: center;
+            padding: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .edit-mode .masa-item:hover .delete-masa-btn {
+            display: flex !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ÜST BİLGİ PANELİ -->
+    <div class="header-card mb-5">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 fw-bold mb-0">{{ sube.ad }}</h1>
+                    <small class="opacity-75"><i class="bi bi-geo-alt"></i> ELAKİ Yönetim Sistemi</small>
+                </div>
+                <div class="d-flex gap-2">
+                    {% if user.is_superuser or user.profil.rol == 'Yonetici' or user.profil.rol == 'Asci' %}
+<a href="{% url 'mutfak_bolge_secimi' sube.id %}" class="btn btn-light btn-sm rounded-pill px-3 fw-bold">
+    <i class="bi bi-egg-fried"></i> AŞÇI PANELİ
+</a>
+{% endif %}
+                     <!-- ÇIKIŞ FORMU -->
+    <form action="{% url 'logout' %}" method="post" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill border-0 text-white">
+            <i class="bi bi-box-arrow-right"></i> ÇIKIŞ
+        </button>
+    </form>
+                    <a href="{% url 'ana_sayfa' %}" class="btn btn-outline-light btn-sm rounded-pill"><i class="bi bi-arrow-left"></i>ANA EKRAN</a>
+                </div>
+            </div>
+            
+            <div id="paket-servis-bloku" class="mt-4">
+                <a href="{% url 'paket_servis_ana' sube.id %}" class="text-decoration-none">
+                    <div class="btn-paket">
+                        <i class="bi bi-bicycle fs-4"></i> PAKET SERVİS VE MÜŞTERİ KAYIT
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        
+        <!-- AKTİF PAKETLER -->
+        {% if paketler %}
+        <div class="mb-4">
+            <h6 class="text-muted fw-bold mb-3"><i class="bi bi-box-seam"></i> AKTİF PAKETLER</h6>
+            <div class="d-flex gap-2 overflow-auto pb-2">
+                {% for p in paketler %}
+                <a href="{% url 'paket_detay' p.id %}" class="btn btn-warning btn-sm rounded-pill px-3 shadow-sm fw-bold border-0" style="white-space: nowrap;">
+                    {{ p.musteri.ad_soyad }} ({{ p.toplam_tutar }} TL)
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- KRİTİK STOK UYARISI -->
+        {% if kritik_stoklar %}
+        <div class="alert alert-danger shadow-sm rounded-4 mb-4 no-print">
+            <h6 class="fw-bold mb-2"><i class="bi bi-exclamation-triangle-fill"></i> KRİTİK STOK UYARISI!</h6>
+            <div class="d-flex flex-wrap gap-2">
+                {% for stok in kritik_stoklar %}
+                    <span class="badge bg-white text-danger border">
+                        {{ stok.ad }}: {{ stok.miktar }} {{ stok.birim }} kaldı!
+                    </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if user.is_superuser or user.profil.rol == 'Yonetici' or user.profil.rol == 'Kasa' %}
+        <div id="menu-siparis-onay-bloku" class="ops-strip mb-4">
+            <div class="ops-card">
+                <div class="ops-card-title"><i class="bi bi-clipboard2-check-fill"></i> MENU SIPARIS ONAY</div>
+                <div class="ops-card-desc">QR menu uzerinden gelen talepleri artik masa ekranindan da gorup onay ekranina gecis yapabilirsiniz.</div>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <span class="ops-chip">
+                        <i class="bi bi-hourglass-split"></i>
+                        {{ bekleyen_menu_talep_sayisi }} bekleyen talep
+                    </span>
+                    <a href="{% url 'menu_siparis_onay_listesi' %}" class="btn btn-sm btn-dark rounded-pill px-3 fw-bold">
+                        Onay Ekranini Ac
+                    </a>
+                </div>
+                <div class="menu-mini-list">
+                    {% for talep in bekleyen_menu_talepleri %}
+                    <div class="menu-mini-item">
+                        <div class="d-flex justify-content-between align-items-center gap-3">
+                            <strong>Masa {{ talep.masa_no }}</strong>
+                            <small>{{ talep.olusturma_zamani|date:"H:i" }}</small>
+                        </div>
+                        <small>{{ talep.kalemler.count }} kalem, {{ talep.toplam_tutar }} TL</small>
+                    </div>
+                    {% empty %}
+                    <div class="menu-mini-item">
+                        <small>Bekleyen menu siparisi yok.</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- MASALAR -->
+        <h6 class="text-muted fw-bold mb-4"><i class="bi bi-grid-3x3-gap"></i> SALON PLANI</h6>
+
+        <!-- Düzenleme Kontrolleri -->
+        <div id="duzenleme-modu-bloku" class="d-flex justify-content-end align-items-center mb-3 edit-controls p-2 shadow-sm">
+            <div class="form-check form-switch me-3 d-flex align-items-center">
+                <input class="form-check-input me-2" type="checkbox" role="switch" id="editModeToggle" style="transform: scale(1.3); cursor: pointer;">
+                <label class="form-check-label fw-bold" for="editModeToggle">Düzenleme Modu</label>
+            </div>
+            <input type="file" id="bgUpload" accept="image/*" style="display: none;">
+            <button id="bgUploadBtn" class="btn btn-sm btn-outline-primary rounded-pill px-3 me-2" style="display: none;">
+                <i class="bi bi-image"></i> Arkaplan Yükle
+            </button>
+            <button id="saveLayoutBtn" class="btn btn-sm btn-success rounded-pill px-3" style="display: none;">
+                <i class="bi bi-save"></i> Planı Kaydet
+            </button>
+        </div>
+
+        <div id="masa-plani-alani" 
+             style="width: {{ sube.masa_plani_genislik|stringformat:'.2f' }}px; height: {{ sube.masa_plani_yukseklik|stringformat:'.2f' }}px; {% if sube.kroki_arkaplan %}background-image: url('{{ sube.kroki_arkaplan.url }}'); background-size: cover; background-position: center;{% endif %}"
+             data-w="{{ sube.masa_plani_genislik }}" data-h="{{ sube.masa_plani_yukseklik }}">
+                {% for masa in masa_listesi %}
+                    <div class="masa-item" 
+                         data-id="{{ masa.id }}"
+                         data-x="{{ masa.pos_x|stringformat:'.2f' }}" 
+                         data-y="{{ masa.pos_y|stringformat:'.2f' }}"
+                         data-w="{{ masa.genislik|stringformat:'.2f' }}"
+                         data-h="{{ masa.yukseklik|stringformat:'.2f' }}"
+                         style="width: {{ masa.genislik|stringformat:'.2f' }}px; height: {{ masa.yukseklik|stringformat:'.2f' }}px; transform: translate({{ masa.pos_x|stringformat:'.2f' }}px, {{ masa.pos_y|stringformat:'.2f' }}px);">
+                        
+                        <button class="btn btn-danger btn-sm delete-masa-btn" data-id="{{ masa.id }}"><i class="bi bi-trash-fill"></i></button>
+                        <a href="{% url 'masa_detay' masa.id %}" class="masa-link" style="display: block; width: 100%; height: 100%; text-decoration: none;">
+                            <div class="masa-box 
+                                {% if masa.dolu_mu %} masa-dolu
+                                {% elif masa.rezervasyon_var %} masa-rezerve
+                                {% else %} masa-bos {% endif %}">
+                                
+                                <span class="masa-label">Masa</span>
+                                <h2 class="masa-no">{{ masa.masa_no }}</h2>
+                                
+                                {% if masa.dolu_mu %}
+                                    <div class="price-tag">{{ masa.su_anki_tutar }} TL</div>
+                                    <div class="status-label small mt-1">DOLU</div>
+                                {% elif masa.rezervasyon_var %}
+                                    <div class="rezerve-tag">REZERVE</div>
+                                    <div class="status-label small mt-1 text-warning">📅 {{ masa.rezervasyon_saat|time:"H:i" }}</div>
+                                {% else %}
+                                    <div class="status-label small mt-2 text-success">BOŞ</div>
+                                {% endif %}
+                            </div>
+                        </a>
+                    </div>
+                {% empty %}
+                <div class="d-flex align-items-center justify-content-center h-100">
+                    <p class="text-muted">Henüz masa tanımlanmamış.</p>
+                </div>
+                {% endfor %}
+        </div>
+
+        <div id="alt-operasyon-alani" class="mt-4"></div>
+    </div>
+
+    <!-- Ses elementi -->
+<audio id="notificationSound" preload="auto" style="display:none;">
+    <source src="https://notificationsounds.com/storage/sounds/file-sounds-1150-pristine.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const altOperasyonAlani = document.getElementById('alt-operasyon-alani');
+    const paketServisBloku = document.getElementById('paket-servis-bloku');
+    const menuSiparisOnayBloku = document.getElementById('menu-siparis-onay-bloku');
+    const duzenlemeModuBloku = document.getElementById('duzenleme-modu-bloku');
+
+    if (altOperasyonAlani) {
+        [paketServisBloku, menuSiparisOnayBloku, duzenlemeModuBloku].forEach((blok) => {
+            if (blok) {
+                altOperasyonAlani.appendChild(blok);
+            }
+        });
+    }
+
+    const editModeToggle = document.getElementById('editModeToggle');
+    const saveLayoutBtn = document.getElementById('saveLayoutBtn');
+    const bgUploadBtn = document.getElementById('bgUploadBtn');
+    const bgUpload = document.getElementById('bgUpload');
+    const planAlani = document.getElementById('masa-plani-alani');
+    let isEditMode = false;
+    let lastNotificationSignature = '';
+
+    function toggleEditMode(active) {
+        isEditMode = active;
+        if (active) {
+            planAlani.classList.add('edit-mode');
+            saveLayoutBtn.style.display = 'inline-block';
+            bgUploadBtn.style.display = 'inline-block';
+            document.querySelectorAll('.masa-link').forEach(a => a.style.pointerEvents = 'none');
+        } else {
+            planAlani.classList.remove('edit-mode');
+            saveLayoutBtn.style.display = 'none';
+            bgUploadBtn.style.display = 'none';
+            document.querySelectorAll('.masa-link').forEach(a => a.style.pointerEvents = 'auto');
+        }
+    }
+
+    editModeToggle.addEventListener('change', (event) => {
+        toggleEditMode(event.target.checked);
+    });
+
+    saveLayoutBtn.addEventListener('click', async () => {
+        const formData = new FormData();
+        formData.append('sube_id', '{{ sube.id }}');
+        formData.append('kroki_w', parseFloat(planAlani.getAttribute('data-w')) || 1200);
+        formData.append('kroki_h', parseFloat(planAlani.getAttribute('data-h')) || 800);
+
+        const fileInput = document.getElementById('bgUpload');
+        if (fileInput.files.length > 0) {
+            formData.append('kroki_arkaplan', fileInput.files[0]);
+        }
+
+        let masalarArray = [];
+        document.querySelectorAll('.masa-item').forEach(el => {
+            masalarArray.push({
+                id: el.dataset.id,
+                x: parseFloat(String(el.dataset.x).replace(',', '.')),
+                y: parseFloat(String(el.dataset.y).replace(',', '.')),
+                w: parseFloat(String(el.dataset.w).replace(',', '.')),
+                h: parseFloat(String(el.dataset.h).replace(',', '.'))
+            });
+        });
+        formData.append('masalar', JSON.stringify(masalarArray));
+
+        try {
+            const response = await fetch("{% url 'api_masa_plani_kaydet' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: formData
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert('Masa planı ve alan ayarları başarıyla kaydedildi!');
+                editModeToggle.checked = false;
+                toggleEditMode(false);
+            } else {
+                alert('Kaydederken bir hata oluştu: ' + result.error);
+            }
+        } catch (error) {
+            alert('Sunucuya bağlanırken bir hata oluştu.');
+        }
+    });
+
+    // Arkaplan Yükleme İşlemleri
+    if(bgUploadBtn) {
+        bgUploadBtn.addEventListener('click', () => bgUpload.click());
+    }
+    
+    if(bgUpload) {
+        bgUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Resmi kaydetmeden önce ekranda anlık olarak önizletiyoruz. Asıl kayıt "Planı Kaydet" ile olur.
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                planAlani.style.backgroundImage = `url('${evt.target.result}')`;
+                planAlani.style.backgroundSize = 'cover';
+                planAlani.style.backgroundPosition = 'center';
+            }
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Masa Silme İşlemi
+    document.querySelectorAll('.delete-masa-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault(); e.stopPropagation();
+            if(!confirm('Bu masayı silmek istediğinize emin misiniz?')) return;
+            
+            const masaId = btn.getAttribute('data-id');
+            try {
+                const response = await fetch(`/api/masa-sil/${masaId}/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    const masaItem = document.querySelector(`.masa-item[data-id="${masaId}"]`);
+                    if(masaItem) masaItem.remove();
+                } else { alert('Silinirken hata oluştu: ' + result.error); }
+            } catch (error) { alert('Sunucu hatası.'); }
+        });
+    });
+
+    interact('.masa-item')
+        .draggable({
+            inertia: true,
+            modifiers: [
+                interact.modifiers.restrictRect({
+                    restriction: 'parent',
+                    endOnly: true
+                })
+            ],
+            autoScroll: true,
+            listeners: {
+                start: (event) => { if (!isEditMode) event.interaction.stop(); },
+                move: dragMoveListener,
+            }
+        })
+        .resizable({
+            edges: { left: true, right: true, bottom: true, top: true },
+            listeners: {
+                start: (event) => { if (!isEditMode) event.interaction.stop(); },
+                move: resizeListener,
+            },
+            modifiers: [
+                interact.modifiers.restrictEdges({ outer: 'parent' }),
+                interact.modifiers.restrictSize({ min: { width: 80, height: 80 } })
+            ],
+            inertia: true
+        });
+
+    // Kroki Alanını Yeniden Boyutlandırma (Alan Büyütme/Küçültme)
+    interact('#masa-plani-alani').resizable({
+        edges: { left: false, top: false, right: true, bottom: true },
+        listeners: {
+            start: (event) => { if (!isEditMode) event.interaction.stop(); },
+            move: function (event) {
+                if (!isEditMode) return;
+                let target = event.target;
+                target.style.width = event.rect.width + 'px';
+                target.style.height = event.rect.height + 'px';
+                target.setAttribute('data-w', event.rect.width);
+                target.setAttribute('data-h', event.rect.height);
+            }
+        },
+        modifiers: [ interact.modifiers.restrictSize({ min: { width: 300, height: 300 } }) ]
+    });
+
+    function dragMoveListener(event) {
+        const target = event.target;
+        const x = (parseFloat(String(target.getAttribute('data-x')).replace(',', '.')) || 0) + event.dx;
+        const y = (parseFloat(String(target.getAttribute('data-y')).replace(',', '.')) || 0) + event.dy;
+        target.style.transform = `translate(${x}px, ${y}px)`;
+        target.setAttribute('data-x', x);
+        target.setAttribute('data-y', y);
+    }
+
+    function resizeListener(event) {
+        const target = event.target;
+        let x = (parseFloat(String(target.getAttribute('data-x')).replace(',', '.')) || 0);
+        let y = (parseFloat(String(target.getAttribute('data-y')).replace(',', '.')) || 0);
+
+        target.style.width = event.rect.width + 'px';
+        target.style.height = event.rect.height + 'px';
+
+        x += event.deltaRect.left;
+        y += event.deltaRect.top;
+
+        target.style.transform = `translate(${x}px, ${y}px)`;
+        target.setAttribute('data-x', x);
+        target.setAttribute('data-y', y);
+        target.setAttribute('data-w', event.rect.width);
+        target.setAttribute('data-h', event.rect.height);
+    }
+
+    window.dragMoveListener = dragMoveListener;
+    window.resizeListener = resizeListener;
+});
+</script>
+
+<script>
+// --- BİLDİRİM VE ÇAĞRI SİSTEMİ ---
+function checkNotifications() {
+    if (isEditMode) return;
+
+    const subeId = "{{ sube.id }}" !== "None" ? "{{ sube.id }}" : "{{ masa.sube.id }}";
+
+    if (!subeId || subeId === "" || subeId === "None") return;
+
+    fetch(`/api/bildirim/${subeId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.length > 0) {
+                const signature = JSON.stringify(data.map(item => [item.id, item.tur, item.masa, item.urun]));
+                if (signature === lastNotificationSignature) {
+                    return;
+                }
+                lastNotificationSignature = signature;
+
+                const sound = document.getElementById('notificationSound');
+                if (sound) {
+                    sound.play().catch(e => console.log("Ses çalma tarayıcı tarafından engellendi."));
+                }
+
+                let notificationMsg = "";
+                data.forEach(item => {
+                    if (item.tur === 'yemek') {
+                        notificationMsg += `🔔 YEMEK HAZIR: Masa ${item.masa} - ${item.urun}\n`;
+                    } else if (item.tur === 'cagri') {
+                        notificationMsg += `🙋 GARSON ÇAĞRISI: Masa ${item.masa} sizi bekliyor!\n`;
+                    }
+                });
+
+                alert(notificationMsg);
+            }
+        })
+        .catch(err => console.error("Bildirim sorgulama hatası:", err));
+}
+
+document.addEventListener('click', function() {
+    const sound = document.getElementById('notificationSound');
+    if (sound) {
+        sound.muted = true;
+        sound.play().then(() => {
+            sound.pause();
+            sound.muted = false;
+        });
+    }
+}, { once: true });
+
+setInterval(checkNotifications, 15000);
+checkNotifications();
+</script>
+
+    <!-- LOGO FİLİGRAN -->
+    <img src="/static/logo.png" class="footer-logo no-print">
+
+  <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>  
+</body>
+</html>

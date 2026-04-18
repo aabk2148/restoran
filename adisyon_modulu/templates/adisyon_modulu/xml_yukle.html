@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>XML Fatura Yükle</h2>
+
+    <form method="post" enctype="multipart/form-data" class="card p-3 mb-4">
+        {% csrf_token %}
+        <input type="file" name="xml" class="form-control mb-3" required>
+        <button class="btn btn-success">Yükle</button>
+    </form>
+
+    {% if eslesmeyen %}
+    <div class="card p-3">
+        <h4>Eşleşmeyen Ürünler</h4>
+
+        {% for item in eslesmeyen %}
+        <div class="border rounded p-3 mb-3">
+            <p><strong>XML Ürün:</strong> {{ item.urun_adi }}</p>
+            <p><strong>Barkod:</strong> {{ item.barkod|default:"-" }}</p>
+            <p><strong>Miktar:</strong> {{ item.miktar }}</p>
+            <p><strong>Fiyat:</strong> {{ item.fiyat }}</p>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <form method="post" action="{% url 'xml_eslesme_kaydet' %}" class="card p-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="xml_urun_adi" value="{{ item.urun_adi }}">
+                        <input type="hidden" name="xml_barkod" value="{{ item.barkod }}">
+                        <input type="hidden" name="miktar" value="{{ item.miktar }}">
+                        <input type="hidden" name="fiyat" value="{{ item.fiyat }}">
+
+                        <label class="form-label">Mevcut stok seç</label>
+                        <select name="stok_id" class="form-select mb-3" required>
+                            <option value="">Seçiniz</option>
+                            {% for stok in stoklar %}
+                                <option value="{{ stok.id }}">{{ stok.ad }} ({{ stok.birim }})</option>
+                            {% empty %}
+                                <option value="">Hiç stok kartı yok</option>
+                            {% endfor %}
+                        </select>
+
+                        <button class="btn btn-primary">Mevcut stoğa bağla ve stok ekle</button>
+                    </form>
+                </div>
+
+                <div class="col-md-6">
+                    <form method="post" action="{% url 'xml_eslesme_kaydet' %}" class="card p-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="xml_urun_adi" value="{{ item.urun_adi }}">
+                        <input type="hidden" name="xml_barkod" value="{{ item.barkod }}">
+                        <input type="hidden" name="miktar" value="{{ item.miktar }}">
+                        <input type="hidden" name="fiyat" value="{{ item.fiyat }}">
+                        <input type="hidden" name="yeni_stok" value="1">
+
+                        <label class="form-label">Yeni stok adı</label>
+                        <input type="text" name="yeni_stok_adi" class="form-control mb-2" value="{{ item.urun_adi }}" required>
+
+                        <label class="form-label">Birim</label>
+                        <select name="birim" class="form-select mb-3">
+                            <option value="adet">adet</option>
+                            <option value="kg">kg</option>
+                            <option value="gr">gr</option>
+                            <option value="lt">lt</option>
+                        </select>
+                        <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" name="satilabilir_yeni_stok" value="1" id="satilabilir_{{ forloop.counter }}">
+    <label class="form-check-label" for="satilabilir_{{ forloop.counter }}">
+        Bu yeni stok aynı zamanda satılabilir ürün olsun
+    </label>
+</div>
+
+                        <button class="btn btn-warning">Yeni stok kartı aç ve stok ekle</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

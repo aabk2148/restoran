@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Tedarikçiler - ELAKİ{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-truck"></i> Tedarikçiler</h2>
+        <a href="{% url 'tedarikci_ekle' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Yeni Tedarikçi
+        </a>
+    </div>
+
+    <!-- Filtre -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row">
+                <div class="col-md-4">
+                    <select name="sube" class="form-control">
+                        <option value="">Tüm Şubeler</option>
+                        {% for sube in subeler %}
+                        <option value="{{ sube.id }}" {% if secili_sube == sube.id|stringformat:"s" %}selected{% endif %}>
+                            {{ sube.ad }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary">Filtrele</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tedarikçi Listesi -->
+    <div class="row">
+        {% for tedarikci in tedarikciler %}
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card {% if not tedarikci.aktif %}bg-light{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h5 class="card-title">{{ tedarikci.ad }}</h5>
+                        {% if not tedarikci.aktif %}
+                        <span class="badge bg-secondary">Pasif</span>
+                        {% endif %}
+                    </div>
+                    <p class="card-text">
+                        <i class="bi bi-person"></i> {{ tedarikci.yetkili }}<br>
+                        <i class="bi bi-telephone"></i> {{ tedarikci.telefon }}<br>
+                        <i class="bi bi-envelope"></i> {{ tedarikci.email }}<br>
+                        <i class="bi bi-shop"></i> {{ tedarikci.sube.ad }}
+                    </p>
+                    <div class="btn-group">
+                        <a href="{% url 'tedarikci_duzenle' tedarikci.id %}" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil"></i> Düzenle
+                        </a>
+                        <a href="{% url 'tedarikci_sil' tedarikci.id %}" class="btn btn-sm btn-danger" 
+                           onclick="return confirm('{{ tedarikci.ad }} silinecek. Emin misiniz?')">
+                            <i class="bi bi-trash"></i> Sil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                Henüz tedarikçi eklenmemiş.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,879 @@
+{% extends 'hizli_satis/base.html' %}
+{% load static %}
+
+{% block title %}Satış Geçmişi - {{ kasa.kasa_adi }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .history-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .filter-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        margin-bottom: 25px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .filter-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #495057;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .filter-title i {
+        color: #007bff;
+        font-size: 1.3rem;
+    }
+    
+    .date-range {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .date-input {
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .stats-mini-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+    }
+    
+    .stats-mini-card .label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+    
+    .stats-mini-card .value {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .sale-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border: 1px solid #e9ecef;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    
+    .sale-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-color: #007bff;
+    }
+    
+    .sale-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px dashed #e9ecef;
+    }
+    
+    .fis-no {
+        font-family: monospace;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .sale-time {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .sale-time i {
+        margin-right: 5px;
+    }
+    
+    .customer-info {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .customer-avatar {
+        width: 40px;
+        height: 40px;
+        background: #007bff;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    
+    .customer-details {
+        flex: 1;
+    }
+    
+    .customer-name {
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    
+    .customer-phone {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    .products-list {
+        margin: 15px 0;
+        max-height: 200px;
+        overflow-y: auto;
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 10px;
+    }
+    
+    .product-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .product-row:last-child {
+        border-bottom: none;
+    }
+    
+    .product-name {
+        font-weight: 500;
+    }
+    
+    .product-qty {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-left: 10px;
+    }
+    
+    .product-price {
+        font-weight: 600;
+        color: #28a745;
+    }
+    
+    .sale-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .payment-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .payment-nakit {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .payment-kart {
+        background: #cce5ff;
+        color: #004085;
+    }
+    
+    .payment-karma {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .total-amount {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #dc3545;
+    }
+    
+    .pagination {
+        margin-top: 30px;
+        justify-content: center;
+    }
+    
+    .page-link {
+        color: #007bff;
+        border-radius: 5px;
+        margin: 0 3px;
+    }
+    
+    .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    
+    .export-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+    
+    .export-btn {
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .export-excel {
+        background: #28a745;
+        color: white;
+        border: none;
+    }
+    
+    .export-pdf {
+        background: #dc3545;
+        color: white;
+        border: none;
+    }
+    
+    .export-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    }
+    
+    .summary-box {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .detail-modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    
+    .receipt-preview {
+        font-family: 'Courier New', monospace;
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    .receipt-line {
+        border-bottom: 1px dashed #dee2e6;
+        margin: 10px 0;
+    }
+    
+    .loading-spinner-small {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #007bff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .quick-search {
+        position: relative;
+    }
+    
+    .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .search-result-item {
+        padding: 12px;
+        border-bottom: 1px solid #dee2e6;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    
+    .search-result-item:hover {
+        background: #f8f9fa;
+    }
+    
+    .result-fis {
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .result-date {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    .date-separator {
+        text-align: center;
+        margin: 20px 0;
+        position: relative;
+    }
+    
+    .date-separator::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #dee2e6;
+        z-index: 1;
+    }
+    
+    .date-separator span {
+        background: white;
+        padding: 0 15px;
+        position: relative;
+        z-index: 2;
+        color: #6c757d;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="history-container">
+        <!-- Başlık -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2>
+                    <i class="bi bi-clock-history"></i> Satış Geçmişi
+                </h2>
+                <p class="text-muted">
+                    <i class="bi bi-cash-register"></i> {{ kasa.kasa_adi }} - {{ kasa.sube.ad }}
+                </p>
+            </div>
+            <div>
+                <a href="{% url 'kasa_ekrani' kasa.id %}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left"></i> Kasaya Dön
+                </a>
+            </div>
+        </div>
+
+        <!-- Filtre Kartı -->
+        <div class="filter-card">
+            <div class="filter-title">
+                <i class="bi bi-funnel"></i>
+                Filtreleme Seçenekleri
+            </div>
+            
+            <form method="GET" id="filterForm">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Tarih Aralığı</label>
+                        <div class="date-range">
+                            <div class="date-input">
+                                <input type="date" class="form-control" name="baslangic" 
+                                       value="{{ baslangic|default:'' }}" id="startDate">
+                            </div>
+                            <span>-</span>
+                            <div class="date-input">
+                                <input type="date" class="form-control" name="bitis" 
+                                       value="{{ bitis|default:'' }}" id="endDate">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">Müşteri Ara</label>
+                        <div class="quick-search">
+                            <input type="text" class="form-control" id="customerSearch" 
+                                   placeholder="İsim veya telefon..." value="{{ request.GET.musteri }}">
+                            <div class="search-results" id="searchResults"></div>
+                            <input type="hidden" name="musteri" id="selectedCustomer" 
+                                   value="{{ request.GET.musteri }}">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">Ödeme Tipi</label>
+                        <select class="form-select" name="odeme" id="paymentType">
+                            <option value="">Tümü</option>
+                            <option value="nakit" {% if request.GET.odeme == 'nakit' %}selected{% endif %}>Nakit</option>
+                            <option value="kart" {% if request.GET.odeme == 'kart' %}selected{% endif %}>Kart</option>
+                            <option value="karma" {% if request.GET.odeme == 'karma' %}selected{% endif %}>Karma</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Filtrele
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Hızlı Filtreler -->
+            <div class="mt-3 d-flex gap-2 flex-wrap">
+                <button class="btn btn-sm btn-outline-secondary quick-filter" data-days="1">
+                    <i class="bi bi-calendar-day"></i> Bugün
+                </button>
+                <button class="btn btn-sm btn-outline-secondary quick-filter" data-days="7">
+                    <i class="bi bi-calendar-week"></i> Son 7 Gün
+                </button>
+                <button class="btn btn-sm btn-outline-secondary quick-filter" data-days="30">
+                    <i class="bi bi-calendar-month"></i> Son 30 Gün
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" id="thisMonth">
+                    <i class="bi bi-calendar"></i> Bu Ay
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" id="lastMonth">
+                    <i class="bi bi-calendar"></i> Geçen Ay
+                </button>
+            </div>
+        </div>
+
+        <!-- Özet İstatistikler -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="stats-mini-card">
+                    <div class="label">Toplam Satış</div>
+                    <div class="value">{{ satislar|length }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-mini-card">
+                    <div class="label">Toplam Ciro</div>
+                    <div class="value">{{ toplam_tutar|floatformat:2 }} TL</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-mini-card">
+                    <div class="label">Ortalama Sepet</div>
+                    <div class="value">
+                        {% if satislar %}
+                            {{ toplam_tutar|divisibleby:satislar.count|floatformat:2 }} TL
+                        {% else %}
+                            0.00 TL
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-mini-card">
+                    <div class="label">En Yüksek Satış</div>
+                    <div class="value">
+                        {% if satislar %}
+                            {{ satislar.first.toplam_tutar|floatformat:2 }} TL
+                        {% else %}
+                            0.00 TL
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="export-buttons mb-3">
+    <a href="{% url 'satis_export' 'excel' %}?kasa_id={{ kasa.id }}{% if request.GET.baslangic %}&baslangic={{ request.GET.baslangic }}{% endif %}{% if request.GET.bitis %}&bitis={{ request.GET.bitis }}{% endif %}{% if request.GET.musteri %}&musteri={{ request.GET.musteri|urlencode }}{% endif %}{% if request.GET.odeme %}&odeme={{ request.GET.odeme }}{% endif %}" 
+       class="export-btn export-excel">
+        <i class="bi bi-file-excel"></i> Excel Aktar
+    </a>
+    <a href="{% url 'satis_export' 'pdf' %}?kasa_id={{ kasa.id }}{% if request.GET.baslangic %}&baslangic={{ request.GET.baslangic }}{% endif %}{% if request.GET.bitis %}&bitis={{ request.GET.bitis }}{% endif %}{% if request.GET.musteri %}&musteri={{ request.GET.musteri|urlencode }}{% endif %}{% if request.GET.odeme %}&odeme={{ request.GET.odeme }}{% endif %}" 
+       class="export-btn export-pdf">
+        <i class="bi bi-file-pdf"></i> PDF Aktar
+    </a>
+</div>
+
+        <!-- Satış Listesi -->
+        <div id="salesList">
+            {% regroup satislar by tarih|date:"d F Y" as tarih_gruplari %}
+            
+            {% for grup in tarih_gruplari %}
+            <div class="date-separator">
+                <span>{{ grup.grouper }}</span>
+            </div>
+            
+            {% for satis in grup.list %}
+            <div class="sale-card" data-sale-id="{{ satis.id }}" onclick="showSaleDetail({{ satis.id }})">
+                <div class="sale-header">
+                    <div>
+                        <span class="fis-no">
+                            <i class="bi bi-receipt"></i> {{ satis.fis_no }}
+                        </span>
+                    </div>
+                    <div class="sale-time">
+                        <i class="bi bi-clock"></i> {{ satis.tarih|time:"H:i:s" }}
+                    </div>
+                </div>
+                
+                {% if satis.musteri %}
+                <div class="customer-info">
+                    <div class="customer-avatar">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <div class="customer-details">
+                        <div class="customer-name">{{ satis.musteri.ad_soyad }}</div>
+                        <div class="customer-phone">
+                            <i class="bi bi-telephone"></i> {{ satis.musteri.telefon }}
+                            {% if satis.musteri.sadakat_seviyesi %}
+                            <span class="badge bg-info ms-2">{{ satis.musteri.sadakat_seviyesi }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Ürün Özeti (ilk 3 ürün) -->
+                <div class="products-list">
+                    {% for item in satis.items.all|slice:":3" %}
+                    <div class="product-row">
+                        <span>
+                            <span class="product-name">{{ item.urun.ad }}</span>
+                            <span class="product-qty">x{{ item.adet }}</span>
+                        </span>
+                        <span class="product-price">{{ item.toplam_fiyat|floatformat:2 }} TL</span>
+                    </div>
+                    {% endfor %}
+                    {% if satis.items.count > 3 %}
+                    <div class="text-center text-muted small mt-2">
+                        <i class="bi bi-plus-circle"></i> {{ satis.items.count|add:"-3" }} ürün daha
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="sale-footer">
+                    <div>
+                        <span class="payment-badge payment-{{ satis.odeme_tipi }}">
+                            <i class="bi bi-{% if satis.odeme_tipi == 'nakit' %}cash{% elif satis.odeme_tipi == 'kart' %}credit-card{% else %}cash-stack{% endif %}"></i>
+                            {{ satis.get_odeme_tipi_display }}
+                        </span>
+                        {% if satis.odeme_tipi == 'karma' %}
+                        <small class="text-muted ms-2">
+                            (N:{{ satis.nakit_odenen|floatformat:0 }} / K:{{ satis.kart_odenen|floatformat:0 }})
+                        </small>
+                        {% endif %}
+                    </div>
+                    <div class="total-amount">{{ satis.toplam_tutar|floatformat:2 }} TL</div>
+                </div>
+            </div>
+            {% endfor %}
+            {% empty %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+                <h4 class="mt-3 text-muted">Satış bulunamadı</h4>
+                <p>Seçilen kriterlere uygun satış kaydı yok.</p>
+                <a href="{% url 'kasa_ekrani' kasa.id %}" class="btn btn-primary mt-3">
+                    <i class="bi bi-cart"></i> Yeni Satış Yap
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Sayfalama -->
+        {% if satislar.has_other_pages %}
+        <nav aria-label="Sayfalama">
+            <ul class="pagination">
+                {% if satislar.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ satislar.previous_page_number }}{% if request.GET.baslangic %}&baslangic={{ request.GET.baslangic }}{% endif %}{% if request.GET.bitis %}&bitis={{ request.GET.bitis }}{% endif %}{% if request.GET.musteri %}&musteri={{ request.GET.musteri }}{% endif %}{% if request.GET.odeme %}&odeme={{ request.GET.odeme }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in satislar.paginator.page_range %}
+                    {% if satislar.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > satislar.number|add:'-3' and num < satislar.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.baslangic %}&baslangic={{ request.GET.baslangic }}{% endif %}{% if request.GET.bitis %}&bitis={{ request.GET.bitis }}{% endif %}{% if request.GET.musteri %}&musteri={{ request.GET.musteri }}{% endif %}{% if request.GET.odeme %}&odeme={{ request.GET.odeme }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if satislar.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ satislar.next_page_number }}{% if request.GET.baslangic %}&baslangic={{ request.GET.baslangic }}{% endif %}{% if request.GET.bitis %}&bitis={{ request.GET.bitis }}{% endif %}{% if request.GET.musteri %}&musteri={{ request.GET.musteri }}{% endif %}{% if request.GET.odeme %}&odeme={{ request.GET.odeme }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Satış Detay Modalı -->
+<div class="modal fade" id="saleDetailModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-receipt"></i> Satış Detayı
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body detail-modal-body" id="saleDetailContent">
+                <div class="text-center py-5">
+                    <div class="loading-spinner-small mb-3"></div>
+                    <p>Yükleniyor...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-success" id="printSaleReceipt">
+                    <i class="bi bi-printer"></i> Fiş Yazdır
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentSaleId = null;
+let searchTimeout;
+
+$(document).ready(function() {
+    // Hızlı filtreler
+    $('.quick-filter').on('click', function() {
+        let days = $(this).data('days');
+        let endDate = new Date();
+        let startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+        
+        $('#startDate').val(formatDate(startDate));
+        $('#endDate').val(formatDate(endDate));
+        $('#filterForm').submit();
+    });
+    
+    // Bu ay
+    $('#thisMonth').on('click', function() {
+        let now = new Date();
+        let startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        let endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        
+        $('#startDate').val(formatDate(startDate));
+        $('#endDate').val(formatDate(endDate));
+        $('#filterForm').submit();
+    });
+    
+    // Geçen ay
+    $('#lastMonth').on('click', function() {
+        let now = new Date();
+        let startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        let endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+        
+        $('#startDate').val(formatDate(startDate));
+        $('#endDate').val(formatDate(endDate));
+        $('#filterForm').submit();
+    });
+    
+    // Müşteri arama
+    $('#customerSearch').on('input', function() {
+        clearTimeout(searchTimeout);
+        let query = $(this).val().trim();
+        
+        if (query.length < 2) {
+            $('#searchResults').hide();
+            return;
+        }
+        
+        searchTimeout = setTimeout(function() {
+            $.get('/api/musteri-ara/', {q: query}, function(data) {
+                if (data.length > 0) {
+                    let html = '';
+                    data.forEach(c => {
+                        html += `
+                            <div class="search-result-item" data-id="${c.id}" data-name="${c.ad_soyad}">
+                                <div class="result-fis">${c.ad_soyad}</div>
+                                <div class="result-date">${c.telefon} | ${c.sadakat_seviyesi}</div>
+                            </div>
+                        `;
+                    });
+                    $('#searchResults').html(html).show();
+                } else {
+                    $('#searchResults').html('<div class="p-3 text-muted">Müşteri bulunamadı</div>').show();
+                }
+            });
+        }, 500);
+    });
+    
+    // Müşteri seç
+    $(document).on('click', '.search-result-item', function() {
+        let name = $(this).data('name');
+        $('#customerSearch').val(name);
+        $('#selectedCustomer').val(name);
+        $('#searchResults').hide();
+    });
+    
+    // Excel export
+    $('#exportExcel').on('click', function() {
+        exportData('excel');
+    });
+    
+    // PDF export
+    $('#exportPDF').on('click', function() {
+        exportData('pdf');
+    });
+    
+    // Fiş yazdır
+    $('#printSaleReceipt').on('click', function() {
+        if (currentSaleId) {
+            printReceipt(currentSaleId);
+        }
+    });
+    
+    // Sayfa dışına tıklandığında arama sonuçlarını gizle
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.quick-search').length) {
+            $('#searchResults').hide();
+        }
+    });
+});
+
+function formatDate(date) {
+    let year = date.getFullYear();
+    let month = String(date.getMonth() + 1).padStart(2, '0');
+    let day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function showSaleDetail(saleId) {
+    currentSaleId = saleId;
+    
+    $.get(`/api/satis-detay/${saleId}/`, function(data) {
+        let html = `
+            <div class="receipt-preview">
+                <div class="text-center mb-3">
+                    <h5>ELAKI</h5>
+                    <p>Satış Fişi</p>
+                </div>
+                
+                <div class="receipt-line"></div>
+                
+                <div class="mb-3">
+                    <div><strong>Fiş No:</strong> ${data.fis_no}</div>
+                    <div><strong>Tarih:</strong> ${data.tarih}</div>
+                    <div><strong>Kasa:</strong> ${data.kasa}</div>
+                </div>
+                
+                <div class="receipt-line"></div>
+                
+                <div class="mb-3">
+                    <strong>Ürünler:</strong>
+                    ${data.urunler.map(u => `
+                        <div class="d-flex justify-content-between">
+                            <span>${u.ad} x${u.adet}</span>
+                            <span>${u.toplam} TL</span>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="receipt-line"></div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Ara Toplam:</span>
+                        <span>${data.ara_toplam} TL</span>
+                    </div>
+                    ${data.indirim > 0 ? `
+                    <div class="d-flex justify-content-between text-warning">
+                        <span>İndirim:</span>
+                        <span>-${data.indirim} TL</span>
+                    </div>
+                    ` : ''}
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Genel Toplam:</span>
+                        <span class="text-danger">${data.toplam} TL</span>
+                    </div>
+                </div>
+                
+                <div class="receipt-line"></div>
+                
+                <div class="mb-3">
+                    <div><strong>Ödeme:</strong> ${data.odeme_tipi}</div>
+                    <div><strong>Nakit:</strong> ${data.nakit} TL</div>
+                    <div><strong>Kart:</strong> ${data.kart} TL</div>
+                    ${data.para_ustu > 0 ? `<div><strong>Para Üstü:</strong> ${data.para_ustu} TL</div>` : ''}
+                </div>
+                
+                ${data.musteri ? `
+                <div class="receipt-line"></div>
+                <div class="mb-3">
+                    <div><strong>Müşteri:</strong> ${data.musteri.ad}</div>
+                    <div><strong>Telefon:</strong> ${data.musteri.telefon}</div>
+                </div>
+                ` : ''}
+                
+                <div class="text-center mt-3">
+                    <small>Teşekkür ederiz</small>
+                </div>
+            </div>
+        `;
+        
+        $('#saleDetailContent').html(html);
+        $('#saleDetailModal').modal('show');
+    });
+}
+
+function exportData(format) {
+    let params = new URLSearchParams(window.location.search);
+    params.append('export', format);
+    
+    window.location.href = `/hizli-satis/export/${format}/?${params.toString()}`;
+}
+
+function printReceipt(saleId) {
+    window.open(`/hizli-satis/fis-yazdir/${saleId}/`, '_blank');
+}
+
+// Sayfa yazdırma için
+window.onbeforeprint = function() {
+    $('.sale-card').css('break-inside', 'avoid');
+};
+
+window.onafterprint = function() {
+    $('.sale-card').css('break-inside', 'auto');
+};
+</script>
+{% endblock %}

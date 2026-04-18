@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Müşteri Ara - ELAKİ{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- ÜST NAVİGASYON -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="{% url 'ana_sayfa' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Ana Sayfa
+                </a>
+                <h4 class="mb-0">Müşteri Sadakat Programı</h4>
+                <a href="{% url 'musteri_ekle' %}" class="btn btn-success">
+                    <i class="bi bi-person-plus"></i> Yeni Müşteri
+                </a>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-search"></i> Müşteri Ara</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="q" class="form-control form-control-lg" 
+                                   placeholder="Telefon, isim veya e-posta ile ara..." 
+                                   value="{{ query }}" autofocus>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-search"></i> Ara
+                            </button>
+                        </div>
+                    </form>
+                    
+                    {% if query %}
+                        <h6 class="mb-3">"{{ query }}" için sonuçlar:</h6>
+                        
+                        {% if musteriler %}
+                            <div class="list-group">
+                                {% for musteri in musteriler %}
+                                <a href="{% url 'musteri_profil' musteri.id %}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1 fw-bold">{{ musteri.ad_soyad }}</h6>
+                                            <p class="mb-1 small">
+                                                <i class="bi bi-telephone"></i> {{ musteri.telefon }}
+                                                {% if musteri.email %}
+                                                    | <i class="bi bi-envelope"></i> {{ musteri.email }}
+                                                {% endif %}
+                                            </p>
+                                            <p class="mb-0 small text-muted">
+                                                <i class="bi bi-star-fill text-warning"></i> Puan: {{ musteri.sadakat_puani }} 
+                                                | <i class="bi bi-trophy text-info"></i> {{ musteri.sadakat_seviyesi }}
+                                                | <i class="bi bi-calendar"></i> {{ musteri.kayit_tarihi|date:"d.m.Y" }}
+                                            </p>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-primary rounded-pill p-2">
+                                                {{ musteri.ziyaret_sayisi }} ziyaret
+                                            </span>
+                                            {% if musteri.dogum_gunu_indirimi %}
+                                                <span class="badge bg-danger mt-1">🎂 Doğum Günü</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle"></i> Müşteri bulunamadı.
+                                <a href="{% url 'musteri_ekle' %}" class="alert-link">Yeni müşteri eklemek için tıklayın</a>.
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-person-up" style="font-size: 4rem;"></i>
+                            <p class="mt-2">Lütfen aramak için bir terim girin veya yeni müşteri ekleyin</p>
+                            <a href="{% url 'musteri_ekle' %}" class="btn btn-success">
+                                <i class="bi bi-person-plus"></i> Yeni Müşteri Ekle
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

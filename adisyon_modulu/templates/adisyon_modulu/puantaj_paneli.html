@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Personel Puantaj{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1">Personel Puantaj</h1>
+            <div class="text-muted">{{ bugun|date:"d.m.Y" }} tarihli vardiya takibi</div>
+        </div>
+        <a href="{% url 'ana_sayfa' %}" class="btn btn-outline-secondary rounded-pill px-4">Ana Ekran</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-3">Benim Durumum</h2>
+                    {% if aktif_kayit %}
+                        <div class="alert alert-success rounded-4">Aktif vardiya var. Giris: {{ aktif_kayit.giris_saati|date:"H:i" }}</div>
+                    {% else %}
+                        <div class="alert alert-secondary rounded-4">Acili vardiya kaydi yok.</div>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'puantaj_hareketi' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Kisa Not</label>
+                            <textarea name="notu" rows="3" class="form-control" placeholder="Vardiya notu, gecikme, aciklama..."></textarea>
+                        </div>
+                        <button type="submit" class="btn {% if aktif_kayit %}btn-danger{% else %}btn-success{% endif %} w-100 rounded-3 fw-semibold">
+                            {% if aktif_kayit %}Cikis Yap{% else %}Giris Yap{% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-3">{% if yonetim_gorunumu %}Bugunku Personel Hareketleri{% else %}Bugunku Kayitlarim{% endif %}</h2>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Personel</th>
+                                    <th>Sube</th>
+                                    <th>Giris</th>
+                                    <th>Cikis</th>
+                                    <th>Sure</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for kayit in bugun_kayitlari %}
+                                    <tr>
+                                        <td>{{ kayit.user.username }}</td>
+                                        <td>{{ kayit.sube.ad|default:"-" }}</td>
+                                        <td>{{ kayit.giris_saati|date:"H:i" }}</td>
+                                        <td>{% if kayit.cikis_saati %}{{ kayit.cikis_saati|date:"H:i" }}{% else %}Aktif{% endif %}</td>
+                                        <td>{{ kayit.toplam_sure_dakika }} dk</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr><td colspan="5" class="text-center text-muted py-4">Bugun icin puantaj kaydi yok.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-3">Son Kayitlar</h2>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Personel</th>
+                                    <th>Giris</th>
+                                    <th>Cikis</th>
+                                    <th>Not</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for kayit in son_kayitlar %}
+                                    <tr>
+                                        <td>{{ kayit.tarih|date:"d.m.Y" }}</td>
+                                        <td>{{ kayit.user.username }}</td>
+                                        <td>{{ kayit.giris_saati|date:"H:i" }}</td>
+                                        <td>{% if kayit.cikis_saati %}{{ kayit.cikis_saati|date:"H:i" }}{% else %}Aktif{% endif %}</td>
+                                        <td>{{ kayit.notu|default:"-" }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr><td colspan="5" class="text-center text-muted py-4">Kayit bulunamadi.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

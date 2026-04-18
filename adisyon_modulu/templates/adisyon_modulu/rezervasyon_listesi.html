@@ -1,0 +1,202 @@
+{% load custom_filters %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>Rezervasyonlar - ELAKİ</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        :root { --elaki-navy: #0E2A47; --elaki-teal: #1DA1A1; }
+        .header-section { background: linear-gradient(135deg, var(--elaki-navy) 0%, var(--elaki-teal) 100%); color: white; padding: 30px 0 60px 0; border-radius: 0 0 40px 40px; margin-bottom: 20px; }
+        .stat-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .filter-card { background: white; border-radius: 20px; margin-top: -40px; border: none; box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+        .badge-bekliyor { background: #ffc107; color: #000; }
+        .badge-onaylandi { background: #28a745; color: white; }
+        .badge-iptal { background: #dc3545; color: white; }
+        .badge-tamamlandi { background: #17a2b8; color: white; }
+    </style>
+</head>
+<body>
+    <div class="header-section shadow no-print">
+        <div class="container">
+            <!-- Üst Menü -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                <a href="{% url 'ana_sayfa' %}" class="text-white text-decoration-none fw-bold fs-5">
+                    <i class="bi bi-shop"></i> Elaki Yönetim Sistemleri
+                </a>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <a href="{% url 'yonetim_paneli' %}" class="btn btn-outline-light btn-sm rounded-pill px-3 py-2">
+                        <i class="bi bi-grid me-1"></i> Yönetim Paneli
+                    </a>
+                    <a href="{% url 'ana_sayfa' %}" class="btn btn-outline-light btn-sm rounded-pill px-3 py-2">
+                        <i class="bi bi-house me-1"></i> Ana Ekran
+                    </a>
+                    <span class="text-white mx-2 small">
+                        <i class="bi bi-person-circle"></i> {{ user.username }}
+                    </span>
+                    <form action="{% url 'logout' %}" method="post" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-light btn-sm rounded-pill px-3 py-2">
+                            <i class="bi bi-box-arrow-right"></i> Çıkış
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold mb-0"><i class="bi bi-calendar-check me-2"></i>REZERVASYON YÖNETİMİ</h1>
+                    <p class="opacity-75 mb-0">Masa ve Müşteri Takibi</p>
+                </div>
+                <div>
+                    <a href="{% url 'rezervasyon_ekle' %}" class="btn btn-success rounded-pill px-4">
+                        <i class="bi bi-plus-circle"></i> Yeni Rezervasyon
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- İstatistik Kartları -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <h6 class="text-muted mb-2">Toplam</h6>
+                    <h2 class="fw-bold text-navy">{{ toplam }}</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <h6 class="text-muted mb-2">Onaylı</h6>
+                    <h2 class="fw-bold text-success">{{ onayli }}</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <h6 class="text-muted mb-2">Bekleyen</h6>
+                    <h2 class="fw-bold text-warning">{{ bekleyen }}</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <h6 class="text-muted mb-2">Toplam Masa</h6>
+                    <h2 class="fw-bold text-info">{{ subeler.first.masalar.count|default:"0" }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtre Kartı -->
+        <div class="card filter-card mb-4">
+            <div class="card-body p-4">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">ŞUBE</label>
+                        <select name="sube" class="form-select">
+                            <option value="">Tüm Şubeler</option>
+                            {% for sube in subeler %}
+                            <option value="{{ sube.id }}" {% if secili_sube == sube.id|stringformat:"s" %}selected{% endif %}>
+                                {{ sube.ad }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">TARİH</label>
+                        <input type="date" name="tarih" class="form-control" value="{{ tarih }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">DURUM</label>
+                        <select name="durum" class="form-select">
+                            <option value="">Tüm Durumlar</option>
+                            <option value="Bekliyor" {% if secili_durum == 'Bekliyor' %}selected{% endif %}>Bekliyor</option>
+                            <option value="Onaylandı" {% if secili_durum == 'Onaylandı' %}selected{% endif %}>Onaylandı</option>
+                            <option value="Tamamlandı" {% if secili_durum == 'Tamamlandı' %}selected{% endif %}>Tamamlandı</option>
+                            <option value="İptal Edildi" {% if secili_durum == 'İptal Edildi' %}selected{% endif %}>İptal</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-teal w-100">
+                            <i class="bi bi-search"></i> Filtrele
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Rezervasyon Listesi -->
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">#</th>
+                                <th>Müşteri</th>
+                                <th>Telefon</th>
+                                <th>Tarih</th>
+                                <th>Saat</th>
+                                <th>Kişi</th>
+                                <th>Masa</th>
+                                <th>Durum</th>
+                                <th class="text-end pe-4">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rez in rezervasyonlar %}
+                            <tr>
+                                <td class="ps-4">{{ rez.id }}</td>
+                                <td class="fw-bold">{{ rez.musteri_adi }}</td>
+                                <td>{{ rez.musteri_telefon }}</td>
+                                <td>{{ rez.tarih|date:"d.m.Y" }}</td>
+                                <td>{{ rez.saat|time:"H:i" }}</td>
+                                <td>{{ rez.kisi_sayisi }}</td>
+                                <td>
+                                    {% if rez.masa %}
+                                        <span class="badge bg-success">Masa {{ rez.masa.masa_no }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Atanmamış</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if rez.durum == 'Bekliyor' %}
+                                        <span class="badge bg-warning text-dark">Bekliyor</span>
+                                    {% elif rez.durum == 'Onaylandı' %}
+                                        <span class="badge bg-success">Onaylandı</span>
+                                    {% elif rez.durum == 'İptal Edildi' %}
+                                        <span class="badge bg-danger">İptal</span>
+                                    {% elif rez.durum == 'Tamamlandı' %}
+                                        <span class="badge bg-info">Tamamlandı</span>
+                                    {% elif rez.durum == 'Gelmedi' %}
+                                        <span class="badge bg-dark">Gelmedi</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="{% url 'rezervasyon_detay' rez.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> Detay
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center py-5">
+                                    <i class="bi bi-calendar-x" style="font-size: 3rem; color: #ccc;"></i>
+                                    <p class="text-muted mt-3">Rezervasyon bulunamadı.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

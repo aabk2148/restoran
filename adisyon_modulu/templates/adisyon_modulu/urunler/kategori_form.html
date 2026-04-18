@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    {% if kategori %}Kategori Düzenle{% else %}Yeni Kategori Ekle{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                {% if kategori %}Kategori Düzenle{% else %}Yeni Kategori Ekle{% endif %}
+            </h2>
+            <p class="text-muted mb-0">Ürün gruplamasında kullanılacak kategori bilgilerini yönetin</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'kategori_listesi' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-arrow-left me-2"></i>Kategoriler
+            </a>
+            <a href="{% url 'ana_sayfa' %}" class="btn btn-outline-primary rounded-pill px-4">
+                <i class="bi bi-house-door me-2"></i>Ana Sayfa
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">Kategori Bilgileri</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label fw-semibold">Kategori Adı *</label>
+                                <input type="text"
+                                       name="ad"
+                                       class="form-control rounded-3"
+                                       value="{{ kategori.ad|default:'' }}"
+                                       required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Sıra</label>
+                                <input type="number"
+                                       name="sira"
+                                       class="form-control rounded-3"
+                                       value="{{ kategori.sira|default:'0' }}">
+                            </div>
+
+                            <div class="col-12">
+                                <div class="d-flex gap-2 pt-2">
+                                    <button type="submit" class="btn btn-success rounded-pill px-4">
+                                        <i class="bi bi-check-circle me-2"></i>Kaydet
+                                    </button>
+
+                                    <a href="{% url 'kategori_listesi' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                                        Vazgeç
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">Bilgi</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <span class="badge bg-primary-subtle text-primary border mb-2">Kategori</span>
+                        <h5 class="fw-bold mb-1">{{ kategori.ad|default:"Yeni Kategori" }}</h5>
+                        <div class="text-muted small">
+                            Sıra: {{ kategori.sira|default:"0" }}
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="small text-muted">
+                        <p class="mb-2">
+                            <strong>Kategori adı</strong>, ürün ekleme ekranında seçim listesinde görünür.
+                        </p>
+                        <p class="mb-0">
+                            <strong>Sıra</strong> değeri küçük olan kategoriler üstte görünür.
+                        </p>
+                    </div>
+
+                    {% if kategori %}
+                    <hr>
+                    <div class="small text-muted">
+                        <strong>ID:</strong> {{ kategori.id }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,249 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>Paket Servis Paneli - ELAKİ</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+    
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Renk Paleti */
+        .bg-navy { background-color: #0E2A47 !important; }
+        .bg-teal { background-color: #1DA1A1 !important; }
+        .text-navy { color: #0E2A47; }
+        .text-teal { color: #1DA1A1; }
+        .btn-teal { background-color: #1DA1A1; color: white; border: none; font-weight: 600; }
+        .btn-teal:hover { background-color: #168a8a; color: white; }
+        
+        /* Üst Header */
+        .header-section {
+            background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%);
+            color: white;
+            padding: 30px 0;
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Arama Kutusu */
+        .search-card {
+            border: none;
+            border-radius: 20px;
+            margin-top: -50px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .form-control-lg { border-radius: 15px; border: 2px solid #eee; padding-left: 20px; }
+        .form-control-lg:focus { border-color: #1DA1A1; box-shadow: none; }
+
+        /* Müşteri Sonuçları */
+        .result-item {
+            border-radius: 15px !important;
+            margin-bottom: 10px;
+            border: 1px solid #eee !important;
+            transition: all 0.2s;
+        }
+        .result-item:hover { transform: scale(1.01); background-color: #f8f9fa; border-color: #1DA1A1 !important; }
+
+        /* Aktif Paket Kartları */
+        .order-card {
+            border: none;
+            border-radius: 20px;
+            background: white;
+            transition: all 0.3s;
+            border-left: 6px solid #1DA1A1;
+        }
+        .order-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+        
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+ <!-- ÜST HEADER -->
+<div class="header-section text-center">
+    <div class="container">
+        
+        <!-- TEK SATIR HEADER -->
+        <div class="d-flex justify-content-between align-items-center px-3 flex-wrap">
+
+            <!-- SOL -->
+            <a href="{% url 'sube_detay' sube.id %}" class="btn btn-sm btn-light rounded-pill">
+                <i class="bi bi-arrow-left me-1"></i> Geri
+            </a>
+
+            <!-- ORTA -->
+            <h2 class="mb-0 fw-bold text-center flex-grow-1">📦 PAKET SERVİS</h2>
+
+            <!-- SAĞ -->
+            <div class="d-flex gap-2 align-items-center">
+
+                {% if user.is_superuser or user.profil.rol == 'Yonetici' or user.profil.rol == 'Asci' %}
+                    <a href="{% url 'sube_detay' sube.id %}" class="btn btn-light btn-sm rounded-pill px-3 fw-bold">
+                        <i class="bi bi-egg-fried me-1"></i> MASA PANELİ
+                    </a>
+                {% endif %}
+
+                <form action="{% url 'logout' %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold">
+                        <i class="bi bi-box-arrow-right me-1"></i> ÇIKIŞ
+                    </button>
+                </form>
+
+                <a href="{% url 'ana_sayfa' %}" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-bold">
+                    <i class="bi bi-arrow-left me-1"></i> ANA EKRAN
+                </a>
+
+            </div>
+        </div>
+
+        <!-- ALT BİLGİ -->
+        <p class="opacity-75 mt-2">{{ sube.ad }} Şubesi Yönetim Paneli</p>
+
+    </div>
+</div>
+
+    <div class="container">
+        <!-- ARAMA BÖLÜMÜ -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-8">
+                <div class="card search-card">
+                    <div class="card-body p-4">
+                        <form method="GET">
+                            <div class="input-group">
+                                <input type="text" name="q" value="{{ query }}" class="form-control form-control-lg" 
+                                       placeholder="Müşteri adı veya telefon yazın...">
+                                <button class="btn btn-teal px-4 rounded-end-pill">
+                                    <i class="bi bi-search"></i> BUL
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ARAMA SONUÇLARI -->
+        {% if query %}
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-8">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="text-navy fw-bold"><i class="bi bi-person-lines-fill"></i> Arama Sonuçları</h5>
+                    <a href="{% url 'musteri_ekle_paket' sube.id %}" class="btn btn-sm btn-outline-primary rounded-pill">
+                        <i class="bi bi-plus-circle"></i> Yeni Müşteri Kaydet
+                    </a>
+                </div>
+                <div class="list-group shadow-sm">
+                    {% for m in musteriler %}
+                    <a href="{% url 'paket_siparis_olustur' sube.id m.id %}" class="list-group-item list-group-item-action result-item p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1 fw-bold text-navy">{{ m.ad_soyad }}</h6>
+                                <p class="mb-0 small text-muted"><i class="bi bi-telephone"></i> {{ m.telefon }}</p>
+                                <p class="mb-0 mt-1 small text-dark"><i class="bi bi-geo-alt"></i> {{ m.adres|truncatechars:80 }}</p>
+                            </div>
+                            <div class="text-end">
+                                <span class="btn btn-sm btn-teal rounded-pill">Sipariş Aç <i class="bi bi-chevron-right"></i></span>
+                            </div>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="card p-5 text-center border-0 shadow-sm rounded-4">
+                        <i class="bi bi-emoji-frown display-4 text-muted"></i>
+                        <h5 class="mt-3 text-muted">Müşteri bulunamadı.</h5>
+                        <div class="mt-3">
+                            <a href="{% url 'musteri_ekle_paket' sube.id %}" class="btn btn-primary px-4 rounded-pill">
+                                <i class="bi bi-person-plus"></i> YENİ MÜŞTERİ KAYDI OLUŞTUR
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- AKTİF PAKETLER -->
+        <div class="row">
+            <div class="col-12">
+                <h4 class="text-navy fw-bold mb-4"><i class="bi bi-truck text-teal"></i> Hazırlanan / Yoldaki Paketler</h4>
+            </div>
+            
+            {% for p in paketler %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card order-card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="mb-0 fw-bold text-navy">{{ p.musteri.ad_soyad }}</h5>
+                                <small class="text-muted"><i class="bi bi-clock"></i> {{ p.acilis_zamani|date:"H:i" }}</small>
+                            </div>
+                            <span class="status-badge {% if p.paket_durumu == 'Yolda' %}bg-primary text-white{% else %}bg-warning text-dark{% endif %}">
+                                {{ p.paket_durumu|default:"Hazırlanıyor" }}
+                            </span>
+                        </div>
+                        <p class="small text-muted mb-3" style="min-height: 40px;">
+                            <i class="bi bi-geo-alt-fill text-teal"></i> {{ p.musteri.adres|truncatechars:70 }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <span class="h5 mb-0 fw-bold text-navy">{{ p.toplam_tutar }} TL</span>
+                            <a href="{% url 'paket_detay' p.id %}" class="btn btn-sm btn-navy rounded-pill px-3">
+                                Detay <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-inbox text-muted display-1 opacity-25"></i>
+                <p class="text-muted mt-3">Şu an aktif bir paket siparişi bulunmuyor.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    
+
+
+    <style>
+    .footer-logo-container {
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        z-index: 9999;
+        pointer-events: none; /* Altındaki butonlara tıklanmasını engellemez */
+    }
+    .footer-logo-container img {
+        width: 180px; /* Logonun büyüklüğünü buradan ayarlayabilirsin */
+        opacity: 0.6; /* Hafif şeffaf durması daha profesyonel gösterir */
+        filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.1));
+    }
+    /* Yazıcıdan fiş çıkarırken logonun görünmemesi için */
+    @media print {
+        .footer-logo-container {
+            display: none !important;
+        }
+    }
+    /* Mobil cihazlarda biraz daha küçültelim */
+    @media (max-width: 768px) {
+        .footer-logo-container img {
+            width: 120px;
+            opacity: 0.4;
+        }
+    }
+</style>
+<script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

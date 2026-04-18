@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Kategori Yönetimi{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Kategori Yönetimi</h2>
+            <p class="text-muted mb-0">Ürün kategorilerini ekleyin, düzenleyin ve yönetin</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'urun_listesi' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-arrow-left me-2"></i>Ürünler
+            </a>
+            <a href="{% url 'kategori_ekle' %}" class="btn btn-success rounded-pill px-4">
+                <i class="bi bi-plus-circle me-2"></i>Yeni Kategori
+            </a>
+        </div>
+    </div>
+
+    {% if kategoriler %}
+    <div class="row g-4">
+        {% for kategori in kategoriler %}
+        <div class="col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h4 class="fw-bold mb-1">{{ kategori.ad }}</h4>
+                            <div class="text-muted small">
+                                Sıra: <strong>{{ kategori.sira }}</strong>
+                            </div>
+                        </div>
+                        <span class="badge bg-primary-subtle text-primary border">
+                            Kategori
+                        </span>
+                    </div>
+
+                    <div class="mb-3 text-muted small">
+                        Bu kategori ürün formunda seçim alanında görünecek.
+                    </div>
+
+                    <div class="mt-auto d-flex gap-2">
+                        <a href="{% url 'kategori_duzenle' kategori.id %}" class="btn btn-warning btn-sm rounded-pill flex-fill">
+                            <i class="bi bi-pencil-square me-1"></i>Düzenle
+                        </a>
+
+                        <form method="post"
+                              action="{% url 'kategori_sil' kategori.id %}"
+                              class="flex-fill"
+                              onsubmit="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm rounded-pill w-100">
+                                <i class="bi bi-trash me-1"></i>Sil
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-tags fs-1 text-muted d-block mb-3"></i>
+            <h5 class="fw-bold">Henüz kategori yok</h5>
+            <p class="text-muted">İlk kategoriyi oluşturarak başlayın.</p>
+            <a href="{% url 'kategori_ekle' %}" class="btn btn-success rounded-pill px-4">
+                İlk Kategoriyi Ekle
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

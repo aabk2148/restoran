@@ -1,0 +1,632 @@
+{% extends 'hizli_satis/base.html' %}
+{% load static %}
+
+{% block title %}Ödeme - {{ sepet.kasa.kasa_adi }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .summary-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+    .summary-card .total-amount {
+        font-size: 3rem;
+        font-weight: bold;
+        line-height: 1.2;
+    }
+    .payment-method-card {
+        border: 2px solid #dee2e6;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 15px;
+    }
+    .payment-method-card:hover {
+        border-color: #28a745;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .payment-method-card.active {
+        border-color: #28a745;
+        background-color: #f0fff0;
+    }
+    .payment-method-card i {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    .payment-method-card.nakit i { color: #28a745; }
+    .payment-method-card.kart i { color: #007bff; }
+    .payment-method-card.karma i { color: #ffc107; }
+    
+    .customer-search {
+        position: relative;
+    }
+    .customer-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+    }
+    .customer-result-item {
+        padding: 10px;
+        border-bottom: 1px solid #dee2e6;
+        cursor: pointer;
+    }
+    .customer-result-item:hover {
+        background-color: #f8f9fa;
+    }
+    .selected-customer {
+        background-color: #e8f5e9;
+        border-radius: 5px;
+        padding: 10px;
+        margin-top: 10px;
+    }
+    .amount-input {
+        font-size: 1.5rem;
+        text-align: right;
+        font-weight: bold;
+    }
+    .change-amount {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+    .product-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 10px;
+    }
+    .product-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        border-bottom: 1px dashed #dee2e6;
+    }
+    .product-item:last-child {
+        border-bottom: none;
+    }
+    .product-name {
+        font-weight: 500;
+    }
+    .product-price {
+        color: #28a745;
+        font-weight: bold;
+    }
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255,255,255,0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #28a745;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .success-animation {
+        animation: successPulse 0.5s ease;
+    }
+    @keyframes successPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="text-center">
+        <div class="loading-spinner mb-3"></div>
+        <h4>Ödeme işlemi tamamlanıyor...</h4>
+        <p class="text-muted">Lütfen bekleyin</p>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="payment-container">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="bi bi-credit-card"></i> Ödeme İşlemi
+            </h2>
+            <a href="{% url 'kasa_ekrani' sepet.kasa.id %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Sepete Dön
+            </a>
+        </div>
+
+        <!-- Özet Kart -->
+        <div class="summary-card">
+            <div class="row">
+                <div class="col-md-8">
+                    <p class="mb-1">Toplam Tutar</p>
+                    <div class="total-amount" id="totalAmount">{{ sepet.genel_toplam|floatformat:2 }} TL</div>
+                    <p class="mb-0 mt-2">
+                        <i class="bi bi-cart"></i> {{ sepet.sepet_items.count }} ürün
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="mb-2">
+                        <span class="badge bg-light text-dark p-2">
+                            <i class="bi bi-upc-scan"></i> Kasa: {{ sepet.kasa.kasa_no }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="badge bg-warning text-dark p-2">
+                            <i class="bi bi-clock"></i> {{ sepet.baslangic_zamani|time:"H:i:s" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Sol Taraf - Ödeme Detayları -->
+            <div class="col-md-7">
+                <!-- Müşteri Bilgileri -->
+                <div class="card mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-person"></i> Müşteri Bilgileri
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="customer-search mb-3">
+                            <label class="form-label">Müşteri Ara (Telefon veya İsim)</label>
+                            <input type="text" class="form-control" id="customerSearch" 
+                                   placeholder="Telefon numarası veya isim girin...">
+                            <div class="customer-results" id="customerResults"></div>
+                        </div>
+                        
+                        <div id="selectedCustomer" class="selected-customer" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong id="selectedCustomerName"></strong><br>
+                                    <small class="text-muted" id="selectedCustomerPhone"></small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-info" id="selectedCustomerPoints"></span><br>
+                                    <button class="btn btn-sm btn-outline-danger mt-1" id="clearCustomer">
+                                        <i class="bi bi-x"></i> Kaldır
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ödeme Yöntemi -->
+                <div class="card mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-credit-card"></i> Ödeme Yöntemi
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="payment-method-card nakit" data-method="nakit" id="methodNakit">
+                                    <i class="bi bi-cash"></i>
+                                    <h6>Nakit</h6>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="payment-method-card kart" data-method="kart" id="methodKart">
+                                    <i class="bi bi-credit-card"></i>
+                                    <h6>Kart</h6>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="payment-method-card karma" data-method="karma" id="methodKarma">
+                                    <i class="bi bi-cash-stack"></i>
+                                    <h6>Karma</h6>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nakit Ödeme Detayları -->
+                        <div id="nakitDetails" style="display: none;" class="mt-3">
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Ödenen Tutar (TL)</label>
+                                    <input type="number" class="form-control amount-input" id="cashAmount" 
+                                           value="{{ sepet.genel_toplam|floatformat:2 }}" step="0.01" min="0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Para Üstü</label>
+                                    <div class="change-amount" id="changeAmount">0.00 TL</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Kart Ödeme Detayları -->
+                        <div id="kartDetails" style="display: none;" class="mt-3">
+                            <hr>
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                POS cihazından ödeme alındıktan sonra işlemi tamamlayın.
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Kart Tipi</label>
+                                <select class="form-select" id="cardType">
+                                    <option value="kredi">Kredi Kartı</option>
+                                    <option value="banka">Banka Kartı</option>
+                                    <option value="taksit">Taksitli</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Karma Ödeme Detayları -->
+                        <div id="karmaDetails" style="display: none;" class="mt-3">
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nakit (TL)</label>
+                                    <input type="number" class="form-control" id="karmaNakit" 
+                                           value="0" step="0.01" min="0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Kart (TL)</label>
+                                    <input type="number" class="form-control" id="karmaKart" 
+                                           value="{{ sepet.genel_toplam|floatformat:2 }}" step="0.01" min="0">
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <label class="form-label">Kalan Tutar</label>
+                                    <div class="change-amount" id="karmaKalan">0.00 TL</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- İşlem Butonları -->
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success btn-lg" id="completePayment">
+                        <i class="bi bi-check-circle"></i> Ödemeyi Tamamla
+                    </button>
+                    <button class="btn btn-outline-secondary" id="printReceipt" style="display: none;">
+                        <i class="bi bi-printer"></i> Fiş Yazdır
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sağ Taraf - Ürün Listesi -->
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-bag"></i> Sepetteki Ürünler
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="product-list" id="productList">
+                            {% for item in sepet.sepet_items.all %}
+                            {% if item.aktif %}
+                            <div class="product-item">
+                                <div>
+                                    <span class="product-name">{{ item.urun.urun.ad }}</span>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ item.adet }} x {{ item.birim_fiyat|floatformat:2 }} TL
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="product-price">{{ item.toplam_fiyat|floatformat:2 }} TL</div>
+                                    {% if item.indirim_yuzde > 0 %}
+                                    <small class="text-warning">-%{{ item.indirim_yuzde }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Özet -->
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Ara Toplam:</span>
+                                <span class="fw-bold">{{ sepet.ara_toplam|floatformat:2 }} TL</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2 text-warning">
+                                <span>İndirim:</span>
+                                <span>-{{ sepet.indirim_tutari|floatformat:2 }} TL</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2 text-info">
+                                <span>KDV:</span>
+                                <span>{{ sepet.kdv_tutari|floatformat:2 }} TL</span>
+                            </div>
+                            <div class="d-flex justify-content-between fs-5 fw-bold">
+                                <span>Genel Toplam:</span>
+                                <span class="text-success">{{ sepet.genel_toplam|floatformat:2 }} TL</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Başarılı Ödeme Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body py-5">
+                <div class="success-animation mb-4">
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                </div>
+                <h3 class="mb-3">Ödeme Başarılı!</h3>
+                <p class="fs-4 mb-2">Fiş No: <strong id="fisNo"></strong></p>
+                <p class="fs-5 text-muted mb-4" id="paraUstu"></p>
+                
+                <div class="d-grid gap-2 col-6 mx-auto">
+                    <button class="btn btn-success" id="printAfterPayment">
+                        <i class="bi bi-printer"></i> Fiş Yazdır
+                    </button>
+                    <a href="{% url 'kasa_ekrani' sepet.kasa.id %}" class="btn btn-outline-primary">
+                        <i class="bi bi-cart"></i> Yeni Satış
+                    </a>
+                    <a href="{% url 'kasa_secim' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-cash-register"></i> Kasalara Dön
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let sepetId = {{ sepet.id }};
+let totalAmount = {{ sepet.genel_toplam }};
+let selectedMethod = 'nakit';
+let selectedCustomer = null;
+let completedSale = null;
+
+$(document).ready(function() {
+    // Ödeme yöntemi seçimi
+    $('.payment-method-card').on('click', function() {
+        $('.payment-method-card').removeClass('active');
+        $(this).addClass('active');
+        
+        selectedMethod = $(this).data('method');
+        
+        // Detayları göster/gizle
+        $('#nakitDetails, #kartDetails, #karmaDetails').hide();
+        $('#' + selectedMethod + 'Details').show();
+        
+        if (selectedMethod === 'nakit') {
+            calculateChange();
+        } else if (selectedMethod === 'karma') {
+            calculateKarma();
+        }
+    });
+
+    // Nakit hesap
+    $('#cashAmount').on('input', function() {
+        calculateChange();
+    });
+
+    // Karma hesap
+    $('#karmaNakit, #karmaKart').on('input', function() {
+        calculateKarma();
+    });
+
+    // Müşteri ara
+    let searchTimeout;
+    $('#customerSearch').on('input', function() {
+        clearTimeout(searchTimeout);
+        let query = $(this).val().trim();
+        
+        if (query.length < 3) {
+            $('#customerResults').hide();
+            return;
+        }
+        
+        searchTimeout = setTimeout(function() {
+            $.get('/api/musteri-ara/', {q: query}, function(data) {
+                if (data.length > 0) {
+                    let html = '';
+                    data.forEach(c => {
+                        html += `
+                            <div class="customer-result-item" data-id="${c.id}" 
+                                 data-name="${c.ad_soyad}" data-phone="${c.telefon}" data-points="${c.sadakat_puani}">
+                                <strong>${c.ad_soyad}</strong><br>
+                                <small>${c.telefon} | Puan: ${c.sadakat_puani}</small>
+                            </div>
+                        `;
+                    });
+                    $('#customerResults').html(html).show();
+                } else {
+                    $('#customerResults').html('<div class="p-2 text-muted">Müşteri bulunamadı</div>').show();
+                }
+            });
+        }, 500);
+    });
+
+    // Müşteri seç
+    $(document).on('click', '.customer-result-item', function() {
+        selectedCustomer = {
+            id: $(this).data('id'),
+            name: $(this).data('name'),
+            phone: $(this).data('phone'),
+            points: $(this).data('points')
+        };
+        
+        $('#selectedCustomerName').text(selectedCustomer.name);
+        $('#selectedCustomerPhone').text(selectedCustomer.phone);
+        $('#selectedCustomerPoints').text(selectedCustomer.points + ' Puan');
+        $('#selectedCustomer').show();
+        $('#customerSearch').val('').hide();
+        $('#customerResults').hide();
+        
+        // Sadakat puanı indirimi kontrol et
+        if (selectedCustomer.points >= 100) {
+            if (confirm(`${selectedCustomer.points} puanınız var. 100 puan = 10 TL indirim kullanmak ister misiniz?`)) {
+                // Puan indirimi uygula
+            }
+        }
+    });
+
+    // Müşteri kaldır
+    $('#clearCustomer').on('click', function() {
+        selectedCustomer = null;
+        $('#selectedCustomer').hide();
+        $('#customerSearch').val('').show();
+    });
+
+    // Ödemeyi tamamla
+    $('#completePayment').on('click', function() {
+        let paymentData = {
+            odeme_tipi: selectedMethod,
+            musteri_id: selectedCustomer ? selectedCustomer.id : null
+        };
+
+        if (selectedMethod === 'nakit') {
+            paymentData.nakit = parseFloat($('#cashAmount').val()) || totalAmount;
+            paymentData.kart = 0;
+            
+            if (paymentData.nakit < totalAmount) {
+                alert('Nakit tutar yetersiz!');
+                return;
+            }
+        } 
+        else if (selectedMethod === 'kart') {
+            paymentData.nakit = 0;
+            paymentData.kart = totalAmount;
+        } 
+        else if (selectedMethod === 'karma') {
+            paymentData.nakit = parseFloat($('#karmaNakit').val()) || 0;
+            paymentData.kart = parseFloat($('#karmaKart').val()) || 0;
+            
+            if (paymentData.nakit + paymentData.kart < totalAmount) {
+                alert('Toplam ödeme yetersiz!');
+                return;
+            }
+        }
+
+        completePayment(paymentData);
+    });
+
+    // Fiş yazdır
+    $('#printAfterPayment, #printReceipt').on('click', function() {
+        if (completedSale) {
+            printReceipt(completedSale.id);
+        }
+    });
+});
+
+function calculateChange() {
+    let paid = parseFloat($('#cashAmount').val()) || 0;
+    let change = paid - totalAmount;
+    $('#changeAmount').text(change.toFixed(2) + ' TL');
+}
+
+function calculateKarma() {
+    let nakit = parseFloat($('#karmaNakit').val()) || 0;
+    let kart = parseFloat($('#karmaKart').val()) || 0;
+    let kalan = totalAmount - (nakit + kart);
+    $('#karmaKalan').text(kalan.toFixed(2) + ' TL');
+}
+
+function completePayment(data) {
+    $('#loadingOverlay').css('display', 'flex');
+    
+    $.ajax({
+        url: `/hizli-satis/api/sepet/${sepetId}/odeme-tamamla/`,
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        data: JSON.stringify(data),
+        success: function(response) {
+            $('#loadingOverlay').hide();
+            
+            if (response.success) {
+                completedSale = response;
+                $('#fisNo').text(response.fis_no);
+                
+                if (response.para_ustu > 0) {
+                    $('#paraUstu').text(`Para Üstü: ${response.para_ustu.toFixed(2)} TL`);
+                } else {
+                    $('#paraUstu').hide();
+                }
+                
+                if (response.yazdirildi) {
+                    $('#printAfterPayment').prop('disabled', true).html('<i class="bi bi-check"></i> Fiş Yazdırıldı');
+                }
+                
+                $('#successModal').modal('show');
+                $('#printReceipt').show();
+            } else {
+                alert('Hata: ' + response.error);
+            }
+        },
+        error: function() {
+            $('#loadingOverlay').hide();
+            alert('Bir hata oluştu!');
+        }
+    });
+}
+
+function printReceipt(satisId) {
+    window.open(`/hizli-satis/fis-yazdir/${satisId}/`, '_blank');
+}
+
+// Kullanılabilir indirimleri kontrol et
+function checkAvailableDiscounts() {
+    if (!selectedCustomer) return;
+    
+    $.get(`/api/musteri-indirimleri/${selectedCustomer.id}/`, function(discounts) {
+        if (discounts.length > 0) {
+            let html = '<div class="alert alert-info">';
+            html += '<h6>Kullanılabilir İndirimler:</h6>';
+            discounts.forEach(d => {
+                html += `<div class="form-check">
+                    <input class="form-check-input" type="radio" name="discount" value="${d.id}">
+                    <label class="form-check-label">
+                        ${d.aciklama} (${d.deger} TL indirim)
+                    </label>
+                </div>`;
+            });
+            html += '</div>';
+            $('.customer-search').after(html);
+        }
+    });
+}
+</script>
+{% endblock %}

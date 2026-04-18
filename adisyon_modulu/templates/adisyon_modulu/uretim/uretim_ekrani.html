@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Üretim Ekranı{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <div class="row mb-4">
+        <div class="col">
+            <h3>Üretim Ekranı</h3>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <!-- SOL: ÜRETİM FORM -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-elaki text-white">
+                    Yeni Üretim
+                </div>
+
+                <div class="card-body">
+                    <form method="post" action="{% url 'uretim_kaydet' %}">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label>Şube</label>
+                            <select name="sube" class="form-select" required>
+                                <option value="">Seç</option>
+                                {% for sube in subeler %}
+                                    <option value="{{ sube.id }}">{{ sube.ad }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Ürün</label>
+                            <select name="urun" class="form-select" required>
+                                <option value="">Seç</option>
+                                {% for urun in urunler %}
+                                    <option value="{{ urun.id }}">{{ urun.ad }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Miktar</label>
+                            <input type="number" step="0.01" name="miktar" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Açıklama</label>
+                            <textarea name="aciklama" class="form-control"></textarea>
+                        </div>
+
+                        <button class="btn btn-primary w-100">
+                            Üretimi Kaydet
+                        </button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAĞ: SON ÜRETİMLER -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-elaki text-white">
+                    Son Üretimler
+                </div>
+
+                <div class="card-body">
+                    {% if son_uretimler %}
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Ürün</th>
+                                <th>Miktar</th>
+                                <th>Şube</th>
+                                <th>Kullanıcı</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fis in son_uretimler %}
+                            <tr>
+                                <td>{{ fis.tarih|date:"d.m.Y H:i" }}</td>
+                                <td>{{ fis.urun.ad }}</td>
+                                <td>{{ fis.miktar }}</td>
+                                <td>{{ fis.sube.ad }}</td>
+                                <td>{{ fis.olusturan.username }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                        <p>Henüz üretim yok</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

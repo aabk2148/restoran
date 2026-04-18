@@ -1,0 +1,169 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>Rezervasyon Ekle - ELAKİ</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+    <style>
+        body { background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%); min-height: 100vh; padding: 40px 0; }
+        .form-card { background: white; border-radius: 30px; padding: 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .btn-teal { background: #1DA1A1; color: white; border: none; padding: 12px 30px; border-radius: 50px; font-weight: 600; }
+        .btn-teal:hover { background: #0E2A47; color: white; }
+        .form-control, .form-select { border-radius: 10px; padding: 12px; border: 2px solid #e9ecef; }
+        .form-control:focus, .form-select:focus { border-color: #1DA1A1; box-shadow: none; }
+        .masa-option { cursor: pointer; transition: all 0.3s; }
+        .masa-option:hover { transform: scale(1.05); }
+        .masa-option.selected { border: 3px solid #1DA1A1; background: #e6f7f7; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="form-card">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold" style="color: #0E2A47;">📅 Yeni Rezervasyon</h2>
+                        <p class="text-muted">Müşteri bilgilerini girin ve masa seçin</p>
+                    </div>
+
+                    <form method="POST" id="rezervasyonForm">
+                        {% csrf_token %}
+                        
+                        <!-- Şube Seçimi -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Şube <span class="text-danger">*</span></label>
+                            <select name="sube_id" id="subeSelect" class="form-select" required>
+                                <option value="">Şube Seçin</option>
+                                {% for sube in subeler %}
+                                <option value="{{ sube.id }}">{{ sube.ad }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Müşteri Adı <span class="text-danger">*</span></label>
+                                <input type="text" name="musteri_adi" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Telefon <span class="text-danger">*</span></label>
+                                <input type="tel" name="telefon" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Email (Opsiyonel)</label>
+                                <input type="email" name="email" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Kişi Sayısı <span class="text-danger">*</span></label>
+                                <input type="number" name="kisi_sayisi" id="kisiSayisi" class="form-control" min="1" max="20" value="2" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Tarih <span class="text-danger">*</span></label>
+                                <input type="date" name="tarih" id="tarihInput" class="form-control" value="{{ bugun }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Saat <span class="text-danger">*</span></label>
+                                <input type="time" name="saat" id="saatInput" class="form-control" value="{{ bir_sonraki_saat }}" required>
+                            </div>
+                        </div>
+
+                        <!-- Masa Seçimi -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Masa Seçimi</label>
+                            <select name="masa_id" id="masaSelect" class="form-select">
+                                <option value="">Masa Seçin (Opsiyonel)</option>
+                            </select>
+                            <small class="text-muted">Masa seçmezseniz, rezervasyon beklemeye alınır</small>
+                        </div>
+
+                        <!-- Özel İstek -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Özel İstek / Not</label>
+                            <textarea name="ozel_istek" class="form-control" rows="3" placeholder="Özel gün, alerji, tercih..."></textarea>
+                        </div>
+
+                        <!-- Butonlar -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-teal flex-grow-1">
+                                <i class="bi bi-check-circle"></i> Rezervasyon Oluştur
+                            </button>
+                            <a href="{% url 'rezervasyon_listesi' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> İptal
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("✅ Sayfa yüklendi");
+            
+            const subeSelect = document.getElementById('subeSelect');
+            const tarihInput = document.getElementById('tarihInput');
+            const saatInput = document.getElementById('saatInput');
+            const kisiSayisi = document.getElementById('kisiSayisi');
+            const masaSelect = document.getElementById('masaSelect');
+            
+            function loadMasaListesi() {
+                const subeId = subeSelect.value;
+                const tarih = tarihInput.value;
+                const saat = saatInput.value;
+                const kisi = kisiSayisi.value;
+                
+                console.log("🔍 Yükleniyor:", {subeId, tarih, saat, kisi});
+                
+                if (!subeId || !tarih || !saat) {
+                    masaSelect.innerHTML = '<option value="">Önce şube, tarih ve saat seçin</option>';
+                    return;
+                }
+                
+                fetch(`/api/masa-uygunluk/?sube_id=${subeId}&tarih=${tarih}&saat=${saat}&kisi_sayisi=${kisi}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("📊 Gelen masalar:", data);
+                        
+                        let options = '<option value="">Masa Seçin</option>';
+                        
+                        if (data.length === 0) {
+                            options = '<option value="">Bu saatte uygun masa yok</option>';
+                        } else {
+                            data.forEach(masa => {
+                                options += `<option value="${masa.id}">Masa ${masa.no} (${masa.kapasite} kişi)</option>`;
+                            });
+                        }
+                        
+                        masaSelect.innerHTML = options;
+                    })
+                    .catch(error => {
+                        console.error("❌ Hata:", error);
+                        masaSelect.innerHTML = '<option value="">Hata oluştu</option>';
+                    });
+            }
+            
+            subeSelect.addEventListener('change', loadMasaListesi);
+            tarihInput.addEventListener('change', loadMasaListesi);
+            saatInput.addEventListener('change', loadMasaListesi);
+            kisiSayisi.addEventListener('change', loadMasaListesi);
+            
+            // Sayfa yüklendiğinde dene
+            if (subeSelect.value) {
+                loadMasaListesi();
+            }
+        });
+    </script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

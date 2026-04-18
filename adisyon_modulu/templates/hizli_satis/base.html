@@ -1,0 +1,188 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>{% block title %}Hızlı Satış{% endblock %} - ELAKI</title>
+    {% load static %}
+<link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+<script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <style>
+        body { 
+            background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Navigasyon - ELAKI renkleri */
+        .navbar {
+            background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%) !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            padding: 12px 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 800;
+            color: white !important;
+            letter-spacing: 1px;
+            font-size: 1.4rem;
+        }
+        
+        .navbar-brand i {
+            margin-right: 8px;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .navbar-nav .nav-link {
+            color: white !important;
+            opacity: 0.9;
+            transition: all 0.3s;
+            font-weight: 500;
+            padding: 8px 15px !important;
+            border-radius: 30px;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            opacity: 1;
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Ana Sayfa butonu özel stil */
+        .nav-link-home {
+            background: rgba(255,255,255,0.15) !important;
+            border: 1px solid rgba(255,255,255,0.3) !important;
+            margin-right: 10px;
+        }
+        
+        .nav-link-home:hover {
+            background: rgba(255,255,255,0.25) !important;
+            border-color: rgba(255,255,255,0.5) !important;
+        }
+        
+        .nav-link-home i {
+            font-size: 1.1rem;
+            margin-right: 5px;
+        }
+        
+        /* Kullanıcı bilgisi */
+        .user-info {
+            background: rgba(255,255,255,0.1);
+            border-radius: 30px;
+            padding: 5px 15px;
+            margin-right: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .user-info i {
+            margin-right: 5px;
+            font-size: 1rem;
+        }
+        
+        .kasa-header { 
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 15px 0; 
+            margin-bottom: 30px;
+        }
+        
+        .btn-kasa { 
+            padding: 15px; 
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .btn-kasa:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(13,42,71,0.3);
+        }
+        
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+    <!-- Navigasyon - Artık ELAKI renklerinde -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <!-- Sol taraf: Logo ve Ana Sayfa butonu -->
+            <div class="d-flex align-items-center">
+                <a class="navbar-brand" href="{% url 'ana_sayfa' %}">
+                    <i class="bi bi-shop"></i> Elaki Yönetim Sistemleri <span class="fs-6 opacity-75 ms-2">| Hızlı Satış</span>
+                </a>
+                <!-- Ana Sayfaya Dön Butonu (Navigasyon içinde) -->
+                            </div>
+            
+            <!-- Navbar Toggler (Mobil için) -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Sağ taraf: Kullanıcı menüsü -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+
+                <ul class="navbar-nav ms-auto align-items-center gap-2">
+                    <li class="nav-item">
+                        <a href="{% url 'yonetim_paneli' %}" class="btn btn-outline-light btn-sm rounded-pill px-3 py-2">
+                            <i class="bi bi-grid me-1"></i> Yönetim Paneli
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'ana_sayfa' %}" class="btn btn-outline-light btn-sm rounded-pill px-3 py-2">
+                            <i class="bi bi-house me-1"></i> Ana Ekran
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'kasa_secim' %}" class="btn btn-outline-light btn-sm rounded-pill px-3 py-2">
+                            <i class="bi bi-cash-register me-1"></i> Hesaplar
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <span class="nav-link text-white m-0 border-0">
+                            <i class="bi bi-person-circle"></i> {{ user.username }}
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <form action="{% url 'logout' %}" method="post" class="m-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-2">
+                                <i class="bi bi-box-arrow-right"></i> Çıkış
+                            </button>
+                        </form>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mesajlar -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="background: rgba(255,255,255,0.9); border: none; border-radius: 10px;">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Ana İçerik -->
+    {% block content %}{% endblock %}
+
+   
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

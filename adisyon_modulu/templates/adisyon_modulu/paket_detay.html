@@ -1,0 +1,222 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>Paket Detay - {{ adisyon.musteri.ad_soyad }}</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        .customer-header { background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%); color: white; padding: 25px; border-radius: 20px; margin-bottom: 25px; }
+        .menu-card { transition: transform 0.1s; border: none; border-radius: 12px; overflow: hidden; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .menu-card:active { transform: scale(0.92); }
+        .fis-tasarim { background: white; padding: 25px; font-family: 'Courier New', monospace; border: 1px solid #ddd; max-width: 450px; margin: auto; color: #000; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            #yazdirilacak-alan, #yazdirilacak-alan * { visibility: visible; }
+            #yazdirilacak-alan { position: absolute; left: 0; top: 0; width: 100%; border: none; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-3">
+        <!-- ÜST NAVİGASYON -->
+        <div class="d-flex justify-content-between align-items-center no-print mb-3">
+            <a href="{% url 'sube_detay' adisyon.sube.id %}" class="btn btn-outline-secondary rounded-pill">
+                <i class="bi bi-arrow-left"></i> Masalara Dön
+            </a>
+            <h5 class="mb-0 text-muted">Paket #{{ adisyon.id }}</h5>
+        </div>
+
+        <!-- MÜŞTERİ VE DURUM PANELİ -->
+        <div class="customer-header shadow no-print">
+            <div class="row">
+                <div class="col-md-7">
+                    <h3 class="mb-1 fw-bold"><i class="bi bi-box-seam"></i> {{ adisyon.musteri.ad_soyad }}</h3>
+                    <p class="mb-1"><i class="bi bi-telephone"></i> {{ adisyon.musteri.telefon }}</p>
+                    <p class="mb-0 small"><i class="bi bi-geo-alt"></i> {{ adisyon.musteri.adres }}</p>
+                </div>
+                <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                    <small class="d-block mb-2 opacity-75">GÜNCEL DURUM:</small>
+                    <div class="btn-group btn-group-sm rounded-pill overflow-hidden shadow-sm">
+                        <a href="{% url 'paket_durum_degistir' adisyon.id %}?durum=Hazirlaniyor" class="btn {% if adisyon.paket_durumu == 'Hazirlaniyor' or not adisyon.paket_durumu %}btn-warning{% else %}btn-light{% endif %}">Hazırlanıyor</a>
+                        <a href="{% url 'paket_durum_degistir' adisyon.id %}?durum=Yolda" class="btn {% if adisyon.paket_durumu == 'Yolda' %}btn-primary text-white{% else %}btn-light{% endif %}">Yolda</a>
+                        <a href="{% url 'paket_durum_degistir' adisyon.id %}?durum=Teslim Edildi" class="btn {% if adisyon.paket_durumu == 'Teslim Edildi' %}btn-success{% else %}btn-light{% endif %}">Teslimat</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ÜRÜN SEÇİM ALANI (Kategorili) -->
+        <div class="no-print mb-4">
+            <ul class="nav nav-pills mb-3 overflow-auto flex-nowrap pb-2" id="pills-tab" role="tablist">
+                {% for kat in kategoriler %}
+                <li class="nav-item">
+                    <button class="nav-link {% if forloop.first %}active{% endif %} me-2 border" id="tab-{{ kat.id }}" data-bs-toggle="pill" data-bs-target="#content-{{ kat.id }}" type="button">
+                        {{ kat.ad }}
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="tab-content">
+                {% for kat in kategoriler %}
+                <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="content-{{ kat.id }}">
+                    <div class="row g-2">
+                        {% for urun in kat.urunler.all %}
+                        <div class="col-4 col-md-2">
+                            <form action="{% url 'paket_siparis_ekle' adisyon.id %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="urun_id" value="{{ urun.id }}">
+                                <button type="submit" class="menu-card w-100 p-0 text-center border-0 h-100 shadow-sm">
+                                    <div class="p-2">
+                                        <div class="fw-bold text-dark" style="font-size: 0.75rem; height: 2.4em; overflow: hidden;">{{ urun.ad }}</div>
+                                        <div class="small fw-bold text-teal" style="color: #1DA1A1;">{{ urun.fiyat }} TL</div>
+                                    </div>
+                                </button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- ADİSYON / FİŞ ALANI -->
+        <div id="yazdirilacak-alan" class="fis-tasarim shadow-sm mb-4">
+            <div class="text-center">
+                <h3 class="mb-0">{{ adisyon.sube.ad|upper }}</h3>
+                <h5 class="mt-1">*** PAKET SERVİS ***</h5>
+                <div style="border-top: 2px dashed #000; margin: 10px 0;"></div>
+            </div>
+
+            <div class="mb-3" style="font-size: 0.9rem;">
+                <p class="mb-1"><strong>MÜŞTERİ:</strong> {{ adisyon.musteri.ad_soyad }}</p>
+                <p class="mb-1"><strong>TEL:</strong> {{ adisyon.musteri.telefon }}</p>
+                <p class="mb-0"><strong>ADRES:</strong> {{ adisyon.musteri.adres }}</p>
+            </div>
+            
+            <div style="border-top: 1px solid #000; margin: 10px 0;"></div>
+
+            <table class="table table-sm table-borderless">
+                <thead>
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <th>Ürün</th>
+                        <th class="text-center">Ad.</th>
+                        <th class="text-end">Tutar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in adisyon.siparisler.all %}
+                    <tr>
+                        <td style="font-size: 0.85rem;">
+                            <a href="{% url 'siparis_sil' item.id %}" class="btn btn-sm text-danger no-print px-1"><i class="bi bi-x-circle"></i></a>
+                            {{ item.urun.ad }}
+                            <!-- BEKLEYEN/HAZIR BİLGİSİ BURAYA EKLENDİ -->
+                            {% if item.hazir_mi %}
+                                <span class="badge bg-success ms-1" style="font-size: 0.5rem;">HAZIR</span>
+                            {% else %}
+                                <span class="badge bg-secondary ms-1" style="font-size: 0.5rem; opacity: 0.6;">Bekliyor</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center" style="font-size: 0.85rem;">{{ item.adet }}</td>
+                        <td class="text-end" style="font-size: 0.85rem;">{{ item.toplam_fiyat }} TL</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div style="border-top: 2px dashed #000; margin: 10px 0;"></div>
+            <div class="d-flex justify-content-between fw-bold h4">
+                <span>TOPLAM:</span>
+                <span>{{ adisyon.toplam_tutar }} TL</span>
+            </div>
+            <div class="text-center mt-4">
+                <p class="small mb-0">ELAKİ YÖNETİM SİSTEMLERİ</p>
+                <p class="small" style="font-size: 0.7rem;">Tarih: {{ adisyon.acilis_zamani|date:"d.m.Y H:i" }}</p>
+            </div>
+        </div>
+
+        <!-- ALT AKSİYONLAR -->
+        <div class="no-print mx-auto mb-5" style="max-width: 450px;">
+            <div class="d-grid gap-2">
+                <a href="{% url 'toplu_mutfak_yazdir' adisyon.id %}" class="btn btn-success btn-lg fw-bold shadow-sm">
+                    <i class="bi bi-chef"></i> Mutfağa Bildir
+                </a>
+                
+                <!-- YENİ: PAKET FİŞİ YAZDIR BUTONU (KASA YAZICISI) -->
+                <a href="{% url 'paket_fis_yazdir' adisyon.id %}" class="btn btn-primary btn-lg fw-bold shadow-sm">
+                    <i class="bi bi-printer"></i> 🧾 Paket Fişi Yazdır (Kasa)
+                </a>
+                
+                <button onclick="window.print();" class="btn btn-warning btn-lg fw-bold shadow-sm">
+                    <i class="bi bi-printer"></i> Paket Fişini Yazdır (Kurye)
+                </button>
+                
+                <div class="row g-2 mt-2">
+                    <div class="col-6">
+                        <a href="{% url 'masa_kapat' adisyon.id %}?tur=Nakit" class="btn btn-outline-success btn-lg w-100 fw-bold shadow-sm" onclick="return confirm('NAKİT ödeme alındı mı?')">💵 NAKİT</a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'masa_kapat' adisyon.id %}?tur=Kredi Karti" class="btn btn-outline-primary btn-lg w-100 fw-bold shadow-sm" onclick="return confirm('KART ödemesi alındı mı?')">💳 KART</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logo Filigran -->
+    <div class="footer-logo-container no-print">
+        <img src="/static/elaki-logo.png" alt="ELAKİ Logo">
+    </div>
+
+    
+    <script>
+        // Kategori Hafızası
+        document.addEventListener("DOMContentLoaded", function() {
+            const activeTabId = localStorage.getItem('lastCategoryTab');
+            if (activeTabId) {
+                const tabTriggerEl = document.querySelector(`#${activeTabId}`);
+                if (tabTriggerEl) {
+                    const tab = new bootstrap.Tab(tabTriggerEl);
+                    tab.show();
+                }
+            }
+            const tabEls = document.querySelectorAll('button[data-bs-toggle="pill"]');
+            tabEls.forEach(t => t.addEventListener('shown.bs.tab', e => localStorage.setItem('lastCategoryTab', e.target.id)));
+        });
+    </script>
+
+    <style>
+    .footer-logo-container {
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        z-index: 9999;
+        pointer-events: none;
+    }
+    .footer-logo-container img {
+        width: 180px;
+        opacity: 0.6;
+        filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.1));
+    }
+    @media print {
+        .footer-logo-container {
+            display: none !important;
+        }
+    }
+    @media (max-width: 768px) {
+        .footer-logo-container img {
+            width: 120px;
+            opacity: 0.4;
+        }
+    }
+    </style>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

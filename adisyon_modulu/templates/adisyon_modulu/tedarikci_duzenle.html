@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Tedarikçi Düzenle - ELAKİ{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0"><i class="bi bi-pencil"></i> Tedarikçi Düzenle: {{ tedarikci.ad }}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Şube</label>
+                            <select name="sube_id" class="form-control" required>
+                                <option value="">Şube Seçin</option>
+                                {% for sube in subeler %}
+                                <option value="{{ sube.id }}" {% if tedarikci.sube.id == sube.id %}selected{% endif %}>
+                                    {{ sube.ad }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Tedarikçi Adı</label>
+                                <input type="text" name="ad" class="form-control" value="{{ tedarikci.ad }}" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Yetkili Kişi</label>
+                                <input type="text" name="yetkili" class="form-control" value="{{ tedarikci.yetkili }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Telefon</label>
+                                <input type="tel" name="telefon" class="form-control" value="{{ tedarikci.telefon }}" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">E-posta</label>
+                                <input type="email" name="email" class="form-control" value="{{ tedarikci.email }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Adres</label>
+                            <textarea name="adres" class="form-control" rows="3">{{ tedarikci.adres }}</textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Vergi No</label>
+                                <input type="text" name="vergi_no" class="form-control" value="{{ tedarikci.vergi_no }}">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Aktif</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" name="aktif" {% if tedarikci.aktif %}checked{% endif %}>
+                                    <label class="form-check-label">Aktif</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Notlar</label>
+                            <textarea name="notlar" class="form-control" rows="3">{{ tedarikci.notlar }}</textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-save"></i> Güncelle
+                            </button>
+                            <a href="{% url 'tedarikci_listesi' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> İptal
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

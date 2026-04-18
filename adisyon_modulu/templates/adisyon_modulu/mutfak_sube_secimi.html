@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <title>Mutfak Girisi - Sube Secimi</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0E2A47 0%, #1DA1A1 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .selection-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+        .sube-btn {
+            background-color: #ffffff;
+            border: 2px solid #1DA1A1;
+            color: #0E2A47;
+            padding: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .sube-btn:hover {
+            background-color: #1DA1A1;
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .header-title {
+            color: #0E2A47;
+            font-weight: 800;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                <div class="selection-card">
+                    <h2 class="header-title">MUTFAK PANELI</h2>
+                    <p class="text-muted mb-4">Lutfen calisacaginiz subeyi seciniz:</p>
+
+                    <div class="sube-list">
+                        {% for sube in subeler %}
+                        <a href="{% url 'mutfak_bolge_secimi' sube.id %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" class="sube-btn shadow-sm">
+                            {{ sube.ad }}
+                        </a>
+                        {% empty %}
+                        <div class="alert alert-warning">Sisteme kayitli sube bulunamadi.</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mt-4">
+                        <a href="{{ back_url }}" class="text-decoration-none text-secondary small">&larr; Geri Don</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .footer-logo-container {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .footer-logo-container img {
+            width: 180px;
+            opacity: 0.6;
+            filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.1));
+        }
+        @media print {
+            .footer-logo-container {
+                display: none !important;
+            }
+        }
+        @media (max-width: 768px) {
+            .footer-logo-container img {
+                width: 120px;
+                opacity: 0.4;
+            }
+        }
+    </style>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
